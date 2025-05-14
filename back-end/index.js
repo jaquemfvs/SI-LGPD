@@ -9,6 +9,7 @@ app.use(cors());
 app.use(express.json())
 
 app.use('/user', require('./routes/user.routes'));
+app.use('/email', require('./routes/email.routes'));
 
 db.sequelize.sync().then(()=>{
   app.listen(PORT, ()=>console.log(`Server running on https://localhost:${PORT}`));
