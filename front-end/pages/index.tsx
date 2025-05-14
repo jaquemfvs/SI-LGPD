@@ -6,7 +6,7 @@ import { useState } from "react";
 export default function Home() {
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     console.log(email);
     console.log(password);
