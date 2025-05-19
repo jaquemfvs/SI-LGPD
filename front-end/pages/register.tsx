@@ -1,6 +1,53 @@
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import TermsModal from "../components/TermsModal";
 
 export default function Register() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [offersOptIn, setOffersOptIn] = useState(false);
+  const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(true);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (password && confirmPassword) {
+      setPasswordsMatch(password === confirmPassword);
+    } else {
+      setPasswordsMatch(true);
+    }
+  }, [password, confirmPassword]);
+
+  useEffect(() => {
+    if (email === "") {
+      setIsEmailValid(true);
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setIsEmailValid(emailRegex.test(email));
+  }, [email]);
+
+  const handlePrivacyPolicyChange = () => {
+    if (!privacyPolicyAccepted) {
+      setIsTermsModalOpen(true);
+    } else {
+      setPrivacyPolicyAccepted(false);
+    }
+  };
+
+  const handleAcceptTerms = () => {
+    setPrivacyPolicyAccepted(true);
+    setIsTermsModalOpen(false);
+  };
+
+  const handleDeclineTerms = () => {
+    setPrivacyPolicyAccepted(false);
+    setIsTermsModalOpen(false);
+  };
+
   return (
     <main className="w-full bg-gray-900 h-full flex">
       <div className=" flex flex-col w-full h-full items-center justify-center ">
@@ -14,6 +61,8 @@ export default function Register() {
                 <input
                   type="text"
                   id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="border border-gray-400 h-14 w-fit min-w-[20rem] rounded-md bg-white"
                 />
 
@@ -23,8 +72,19 @@ export default function Register() {
                 <input
                   type="email"
                   id="email"
-                  className="border border-gray-400 h-14 w-fit min-w-[20rem] rounded-md bg-white"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`border h-14 w-fit min-w-[20rem] rounded-md bg-white ${
+                    isEmailValid || email === ""
+                      ? "border-gray-400"
+                      : "border-red-500"
+                  }`}
                 />
+                {!isEmailValid && email !== "" && (
+                  <div className="text-red-500 text-sm">
+                    Formato de e-mail inválido.
+                  </div>
+                )}
               </div>
               <div className="flex flex-col gap-2">
                 <label htmlFor="password" className="text-white">
@@ -33,6 +93,8 @@ export default function Register() {
                 <input
                   type="password"
                   id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="border border-gray-400 h-14 w-fit min-w-[20rem]  rounded-md bg-white"
                 />
                 <label htmlFor="password_confirm" className="text-white">
@@ -41,50 +103,93 @@ export default function Register() {
                 <input
                   type="password"
                   id="password_confirm"
-                  className="border border-gray-400 h-14 w-fit min-w-[20rem]  rounded-md bg-white"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`border h-14 w-fit min-w-[20rem] rounded-md bg-white ${
+                    passwordsMatch ? "border-gray-400" : "border-red-500"
+                  }`}
                 />
+                {!passwordsMatch && (
+                  <div className="text-red-500 text-sm">
+                    As senhas não coincidem.
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-5 content-start start-1 text-white wrap-normal">
               <div className="flex flex-row gap-5">
-                <input type="checkbox" id="offers" />
+                <input
+                  type="checkbox"
+                  id="offers"
+                  checked={offersOptIn}
+                  onChange={() => setOffersOptIn(!offersOptIn)}
+                  className="ml-2"
+                />
                 <label htmlFor="offers">
                   Concordo em receber e-mails com novidades e ofertas.
                 </label>
               </div>
 
               <div className="flex flex-row gap-5">
-                <input type="checkbox" id="newsletter" />
-                <label htmlFor="newsletter">
-                  Concordo em receber a newsletter.
-                </label>
-              </div>
-
-              <div className="flex flex-row gap-5">
-                <input type="checkbox" id="privacy_policy" />
-                <label htmlFor="privacy_policy">
-                  Li e aceito a&nbsp;
-                  <Link
-                    href={"https://example.com/privacy"}
-                    className="text-blue-300 underline hover:text-blue-600"
+                <input
+                  type="checkbox"
+                  id="privacy_policy"
+                  checked={privacyPolicyAccepted}
+                  onChange={handlePrivacyPolicyChange}
+                  className="ml-2"
+                />
+                <label htmlFor="privacy_policy" className="cursor-pointer">
+                  Li e aceito os&nbsp;
+                  <span
+                  onClick={() => setIsTermsModalOpen(true)}
+                  className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
                   >
-                    Política de Privacidade
-                  </Link>
+                  Termos de Condições e Política de Privacidade
+                  </span>
                 </label>
               </div>
             </div>
+            {!privacyPolicyAccepted && (
+              <div className="text-red-500 text-sm">
+                Você deve aceitar a Política de Privacidade para continuar.
+              </div>
+            )}
             <div className="flex place-content-center">
-              <button
-                disabled={true}
-                type="submit"
-                className="text-white flex justify-center items-center bg-blue-500 rounded-md h-14 w-fit min-w-[20rem] hover:cursor-pointer hover:scale-115 transition-all active:scale-90"
-              >
-                Registrar
-              </button>
+                <button
+                  disabled={
+                  !privacyPolicyAccepted ||
+                  !name ||
+                  !email ||
+                  !password ||
+                  !confirmPassword ||
+                  !passwordsMatch ||
+                  !isEmailValid
+                  }
+                  type="submit"
+                  className={`text-white flex justify-center items-center rounded-md h-14 w-fit min-w-[20rem] hover:cursor-pointer hover:scale-115 transition-all active:scale-90 ${
+                  !privacyPolicyAccepted ||
+                  !name ||
+                  !email ||
+                  !password ||
+                  !confirmPassword ||
+                  !passwordsMatch ||
+                  !isEmailValid
+                    ? "bg-gray-400"
+                    : "bg-blue-500"
+                  }`}
+                >
+                  Registrar
+                </button>
             </div>
           </div>
         </form>
       </div>
+      <TermsModal
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
+        onAccept={handleAcceptTerms}
+        onDecline={handleDeclineTerms}
+      />
     </main>
   );
 }
