@@ -1,79 +1,50 @@
-import React, { useState } from "react";
-import Link from "next/link";
+import "@/app/globals.css";
+import { useRouter } from "next/router";
+import { FaUserCircle } from "react-icons/fa"; // Ícone de usuário
+import { IoMdMail } from "react-icons/io"; // Ícone de assinatura (Subscribe)
 
-export default function Home() {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+export default function Newsletter() {
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Login:", email, password);
-    // Aqui você pode fazer a chamada para autenticar o usuário
+  const handleSettings = () => {
+    router.push("/settings"); // Redireciona para a página de configurações
   };
 
-  const handleDelete = () => {
-    if (confirm("Tem certeza que deseja cancelar sua assinatura?")) {
-      console.log("Assinatura cancelada para:", email);
-      // Aqui você pode chamar uma API para deletar a conta
-    }
+  const handleSubscribe = () => {
+    alert("Inscrito na Newsletter!"); // Aqui você pode implementar sua lógica de inscrição
   };
 
   return (
-    <main className="w-full min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 p-10 rounded-xl shadow-lg flex flex-col items-center gap-6">
-        <h1 className="text-3xl text-white font-bold">TechLetter 🚀</h1>
-        <p className="text-center text-gray-300">
-          Receba novidades sobre tecnologia e inovação diretamente no seu e-mail!
-        </p>
+    <main className="w-full h-full bg-gray-900 flex flex-col items-center p-6 relative">
+      {/* Botão de Subscribe no canto superior esquerdo */}
+      <button
+        onClick={handleSubscribe}
+        className="absolute top-4 left-4 text-white bg-transparent rounded-full p-2 hover:cursor-pointer hover:scale-105 transition-all active:scale-90 flex items-center gap-2"
+      >
+        <IoMdMail size={28} />
+        <span className="text-sm">Subscribe to our Newsletter</span>
+      </button>
 
-        <form className="flex flex-col gap-4 w-full max-w-md" onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="text-white">
-              E-mail
-            </label>
-            <input
-              type="email"
-              id="email"
-              required
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              className="border border-gray-400 h-12 rounded-md px-4 bg-white"
-            />
+      {/* Botão com ícone de usuário no canto superior direito */}
+      <button
+        onClick={handleSettings}
+        className="absolute top-4 right-4 text-white bg-transparent rounded-full p-2 hover:cursor-pointer hover:scale-105 transition-all active:scale-90"
+      >
+        <FaUserCircle size={32} />
+      </button>
+
+      <h1 className="text-white text-3xl mb-6">Newsletter Tech News</h1>
+
+      {/* Grid de notícias em duas colunas */}
+      <div className="grid grid-cols-2 gap-4 max-w-4xl">
+        {[...Array(6)].map((_, index) => (
+          <div key={index} className="bg-white text-black p-6 rounded-md">
+            <h2 className="text-xl font-bold">Notícia {index + 1}</h2>
+            <p>
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Blanditiis iusto itaque quae eligendi amet illo a eos voluptatum et, nulla inventore nesciunt, aliquid debitis placeat neque ipsa, cumque fuga dolorum. {index + 1}...
+            </p>
           </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="password" className="text-white">
-              Senha
-            </label>
-            <input
-              type="password"
-              id="password"
-              required
-              value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              className="border border-gray-400 h-12 rounded-md px-4 bg-white"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="bg-blue-600 text-white h-12 rounded-md hover:bg-blue-700 transition"
-          >
-            Entrar
-          </button>
-
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="bg-red-600 text-white h-12 rounded-md hover:bg-red-700 transition"
-          >
-            Cancelar Assinatura
-          </button>
-
-          <Link href="/register" className="text-blue-300 underline text-sm hover:text-blue-500">
-            Ainda não tem conta? Cadastre-se
-          </Link>
-        </form>
+        ))}
       </div>
     </main>
   );
