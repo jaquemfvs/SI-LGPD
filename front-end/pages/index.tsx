@@ -1,16 +1,26 @@
 import "@/app/globals.css";
-import Image from "next/image";
+import axios from "axios";
 import Link from "next/link";
+import router from "next/router";
 import { useState } from "react";
 
 export default function Home() {
   const [email, setEmail] = useState<string>();
   const [password, setPassword] = useState<string>();
-  const handleSubmit = (e: any) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(email);
-    console.log(password);
+
+    try {
+      const response = await axios.post('http://localhost:3200/user/login', {
+        email,
+        password,
+      });
+      router.push('/app');
+    } catch (error) {
+    }
   };
+
   return (
     <main className="w-full h-full bg-gray-900">
       <div className=" flex flex-col w-full h-full items-center justify-center ">

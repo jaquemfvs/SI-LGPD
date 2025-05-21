@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import TermsModal from "../components/TermsModal";
+import axios from "axios";
+import { useRouter } from "next/router";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -12,6 +14,22 @@ export default function Register() {
   const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post('http://localhost:3200/user/register', {
+        email,
+        password,
+      });
+      router.push('/');
+    } catch (error) {
+      alert("Não foi possível registrar!");
+    }
+  };
 
   useEffect(() => {
     if (password && confirmPassword) {
@@ -51,7 +69,7 @@ export default function Register() {
   return (
     <main className="w-full bg-gray-900 h-full flex">
       <div className=" flex flex-col w-full h-full items-center justify-center ">
-        <form className="gap-4 flex flex-col">
+        <form onSubmit={handleSubmit} className="gap-4 flex flex-col">
           <div className="flex flex-col gap-5">
             <div className="flex flex-row gap-5">
               <div className="flex flex-col gap-2">
