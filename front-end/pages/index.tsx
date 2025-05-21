@@ -12,13 +12,12 @@ export default function Home() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3200/user/login', {
+      const response = await axios.post("http://localhost:3200/user/login", {
         email,
         password,
       });
-      router.push('/app');
-    } catch (error) {
-    }
+      router.push("/app");
+    } catch (error) {}
   };
 
   return (
@@ -33,7 +32,7 @@ export default function Home() {
               type="email"
               id="email"
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-gray-400 h-14 w-fit min-w-[20rem] rounded-md bg-white"
+              className="border border-gray-400 h-14 w-fit min-w-[20rem] rounded-md bg-white p-2 text-xl"
             />
             <label htmlFor="password" className="text-white">
               Senha
@@ -42,7 +41,7 @@ export default function Home() {
               type="password"
               id="password"
               onChange={(e) => setPassword(e.target.value)}
-              className="border border-gray-400 h-14 w-fit min-w-[20rem]  rounded-md bg-white"
+              className="border border-gray-400 h-14 w-fit min-w-[20rem]  rounded-md bg-white p-2 text-xl"
             />
           </div>
           <div>

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import TermsModal from "../components/TermsModal";
 import axios from "axios";
 import { useRouter } from "next/router";
+import { HiArrowNarrowLeft } from "react-icons/hi";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -21,11 +22,12 @@ export default function Register() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:3200/user/register', {
+      const response = await axios.post("http://localhost:3200/user/register", {
         email,
         password,
       });
-      router.push('/');
+      alert("Conta criada com sucesso!");
+      router.push("/");
     } catch (error) {
       alert("Não foi possível registrar!");
     }
@@ -69,6 +71,14 @@ export default function Register() {
   return (
     <main className="w-full bg-gray-900 h-full flex">
       <div className=" flex flex-col w-full h-full items-center justify-center ">
+        <div className="flex place-content-start items-start pr-[40%] pb-5">
+          <a
+            className="text-white hover:cursor-pointer content-start place-content-start hover:scale-150 transition-all"
+            href="/"
+          >
+            <HiArrowNarrowLeft size={30} />
+          </a>
+        </div>
         <form onSubmit={handleSubmit} className="gap-4 flex flex-col">
           <div className="flex flex-col gap-5">
             <div className="flex flex-row gap-5">
@@ -81,7 +91,7 @@ export default function Register() {
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="border border-gray-400 h-14 w-fit min-w-[20rem] rounded-md bg-white"
+                  className="border border-gray-400 h-14 w-fit min-w-[20rem] rounded-md bg-white p-2  text-xl"
                 />
 
                 <label htmlFor="email" className="text-white">
@@ -92,7 +102,7 @@ export default function Register() {
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`border h-14 w-fit min-w-[20rem] rounded-md bg-white ${
+                  className={`border h-14 w-fit min-w-[20rem] rounded-md bg-white p-2  text-xl ${
                     isEmailValid || email === ""
                       ? "border-gray-400"
                       : "border-red-500"
@@ -113,7 +123,7 @@ export default function Register() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="border border-gray-400 h-14 w-fit min-w-[20rem]  rounded-md bg-white"
+                  className="border border-gray-400 h-14 w-fit min-w-[20rem]  p-2  text-xl rounded-md bg-white"
                 />
                 <label htmlFor="password_confirm" className="text-white">
                   Confirmar Senha
@@ -123,7 +133,7 @@ export default function Register() {
                   id="password_confirm"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`border h-14 w-fit min-w-[20rem] rounded-md bg-white ${
+                  className={`border h-14 w-fit min-w-[20rem] rounded-md bg-white p-2  text-xl ${
                     passwordsMatch ? "border-gray-400" : "border-red-500"
                   }`}
                 />
@@ -159,10 +169,10 @@ export default function Register() {
                 <label htmlFor="privacy_policy" className="cursor-pointer">
                   Li e aceito os&nbsp;
                   <span
-                  onClick={() => setIsTermsModalOpen(true)}
-                  className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
+                    onClick={() => setIsTermsModalOpen(true)}
+                    className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
                   >
-                  Termos de Condições e Política de Privacidade
+                    Termos de Condições e Política de Privacidade
                   </span>
                 </label>
               </div>
@@ -173,8 +183,8 @@ export default function Register() {
               </div>
             )}
             <div className="flex place-content-center">
-                <button
-                  disabled={
+              <button
+                disabled={
                   !privacyPolicyAccepted ||
                   !name ||
                   !email ||
@@ -182,9 +192,9 @@ export default function Register() {
                   !confirmPassword ||
                   !passwordsMatch ||
                   !isEmailValid
-                  }
-                  type="submit"
-                  className={`text-white flex justify-center items-center rounded-md h-14 w-fit min-w-[20rem] hover:cursor-pointer hover:scale-115 transition-all active:scale-90 ${
+                }
+                type="submit"
+                className={`text-white flex justify-center items-center rounded-md h-14 w-fit min-w-[20rem] hover:cursor-pointer hover:scale-115 transition-all active:scale-90 ${
                   !privacyPolicyAccepted ||
                   !name ||
                   !email ||
@@ -194,10 +204,10 @@ export default function Register() {
                   !isEmailValid
                     ? "bg-gray-400"
                     : "bg-blue-500"
-                  }`}
-                >
-                  Registrar
-                </button>
+                }`}
+              >
+                Registrar
+              </button>
             </div>
           </div>
         </form>
