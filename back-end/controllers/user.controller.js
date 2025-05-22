@@ -3,7 +3,7 @@ const service = require("../services/user.services.js");
 class requestHandler {
   // POST
   registerUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, agreedToPromotionalEmails } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: "Todos os campos são obrigatórios." });
     }
@@ -11,6 +11,7 @@ class requestHandler {
     const user = {
       email,
       password: await service.getHashed(password),
+      agreedToPromotionalEmails,
     };
 
     // Create user

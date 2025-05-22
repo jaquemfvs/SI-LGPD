@@ -11,7 +11,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordsMatch, setPasswordsMatch] = useState(true);
-  const [offersOptIn, setOffersOptIn] = useState(false);
+  const [agreedToPromotionalEmails, setagreedToPromotionalEmails] = useState(false);
   const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
@@ -25,6 +25,7 @@ export default function Register() {
       const response = await axios.post("http://localhost:3200/user/register", {
         email,
         password,
+        agreedToPromotionalEmails
       });
       alert("Conta criada com sucesso!");
       router.push("/");
@@ -149,8 +150,8 @@ export default function Register() {
                 <input
                   type="checkbox"
                   id="offers"
-                  checked={offersOptIn}
-                  onChange={() => setOffersOptIn(!offersOptIn)}
+                  checked={agreedToPromotionalEmails}
+                  onChange={() => setagreedToPromotionalEmails(!agreedToPromotionalEmails)}
                   className="ml-2"
                 />
                 <label htmlFor="offers">
