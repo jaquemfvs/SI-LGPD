@@ -16,8 +16,18 @@ export default function Home() {
         email,
         password,
       });
-      router.push("/app");
-    } catch (error) {}
+
+      if (response.data && response.data.token) {
+        console.log("Received token:", response.data.token);
+        localStorage.setItem("token", response.data.token);
+        router.push("/app");
+      } else {
+        console.error("Login failed: Token not received from server.");
+
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
 
   return (
