@@ -7,7 +7,7 @@ export default function Newsletter() {
   const router = useRouter();
 
   const handleSettings = () => {
-    router.push("/settings"); // Redireciona para a página de configurações
+    router.push("/app/settings"); // Redireciona para a página de configurações
   };
 
   const handleSubscribe = () => {

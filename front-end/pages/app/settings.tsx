@@ -33,7 +33,7 @@ export default function UserSettings() {
     <main className="w-full h-full bg-gray-900 flex flex-col items-center p-6 relative">
       {/* Botão para voltar ao menu inicial */}
       <button
-        onClick={() => router.push("/")}
+        onClick={() => router.push("/app")}
         className="absolute top-4 left-4 text-white bg-transparent rounded-full p-2 hover:cursor-pointer hover:scale-105 transition-all active:scale-90 flex items-center gap-2"
       >
         <FaUserCircle size={32} />
