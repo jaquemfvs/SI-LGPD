@@ -12,9 +12,15 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [agreedToPromotionalEmails, setagreedToPromotionalEmails] = useState(false);
-  const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false);
+  // Renamed state for Terms and Conditions
+  const [termsCondAccepted, setTermsCondAccepted] = useState(false);
+  // New state for Privacy Policy specific acceptance
+  const [privacyPolicySpecificAccepted, setPrivacyPolicySpecificAccepted] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
-  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  // Renamed state for modal visibility
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
+  // New state to track which content the modal is for ('terms' or 'privacy')
+  const [modalFocus, setModalFocus] = useState<'terms' | 'privacy' | null>(null);
 
   const router = useRouter();
 
@@ -51,22 +57,44 @@ export default function Register() {
     setIsEmailValid(emailRegex.test(email));
   }, [email]);
 
-  const handlePrivacyPolicyChange = () => {
-    if (!privacyPolicyAccepted) {
-      setIsTermsModalOpen(true);
+  // Renamed handler for Terms and Conditions checkbox change
+  const handleTermsCondChange = () => {
+    if (!termsCondAccepted) {
+      setModalFocus('terms');
+      setIsPolicyModalOpen(true);
     } else {
-      setPrivacyPolicyAccepted(false);
+      setTermsCondAccepted(false);
     }
   };
 
-  const handleAcceptTerms = () => {
-    setPrivacyPolicyAccepted(true);
-    setIsTermsModalOpen(false);
+  // New handler for Privacy Policy specific checkbox change
+  const handlePrivacyPolicySpecificChange = () => {
+    if (!privacyPolicySpecificAccepted) {
+      setModalFocus('privacy');
+      setIsPolicyModalOpen(true);
+    } else {
+      setPrivacyPolicySpecificAccepted(false);
+    }
   };
 
-  const handleDeclineTerms = () => {
-    setPrivacyPolicyAccepted(false);
-    setIsTermsModalOpen(false);
+  // Renamed and updated modal accept handler
+  const handleModalAccept = () => {
+    if (modalFocus === 'terms') {
+      setTermsCondAccepted(true);
+    } else if (modalFocus === 'privacy') {
+      setPrivacyPolicySpecificAccepted(true);
+    }
+    setIsPolicyModalOpen(false);
+  };
+
+  // Renamed and updated modal decline handler
+  const handleModalDecline = () => {
+    if (modalFocus === 'terms') {
+      setTermsCondAccepted(false);
+    } else if (modalFocus === 'privacy') {
+      setPrivacyPolicySpecificAccepted(false);
+    }
+    setIsPolicyModalOpen(false);
   };
 
   return (
@@ -162,31 +190,64 @@ export default function Register() {
               <div className="flex flex-row gap-5">
                 <input
                   type="checkbox"
-                  id="privacy_policy"
-                  checked={privacyPolicyAccepted}
-                  onChange={handlePrivacyPolicyChange}
+                  id="terms_conditions" // Changed id for clarity
+                  checked={termsCondAccepted}
+                  onChange={handleTermsCondChange} // Updated handler
                   className="ml-2"
                 />
-                <label htmlFor="privacy_policy" className="cursor-pointer">
+                <label htmlFor="terms_conditions" className="cursor-pointer"> {/* Changed htmlFor for clarity */}
                   Li e aceito os&nbsp;
                   <span
-                    onClick={() => setIsTermsModalOpen(true)}
+                    onClick={() => {
+                      setModalFocus('terms');
+                      setIsPolicyModalOpen(true);
+                    }} // Updated to set focus and open modal
                     className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
                   >
-                    Termos de Condições e Política de Privacidade
+                    Termos e Condições de Uso
+                  </span>
+                </label>
+              </div>
+              {/* New Checkbox for Privacy Policy */}
+              <div className="flex flex-row gap-5">
+                <input
+                  type="checkbox"
+                  id="privacy_policy_specific"
+                  checked={privacyPolicySpecificAccepted}
+                  onChange={handlePrivacyPolicySpecificChange}
+                  className="ml-2"
+                />
+                <label htmlFor="privacy_policy_specific" className="cursor-pointer">
+                  Li e aceito a&nbsp;
+                  <span
+                    onClick={() => {
+                      setModalFocus('privacy');
+                      setIsPolicyModalOpen(true);
+                    }}
+                    className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
+                  >
+                    Política de Privacidade
                   </span>
                 </label>
               </div>
             </div>
-            {!privacyPolicyAccepted && (
+            {/* Updated error message for Terms and Conditions */}
+            {!termsCondAccepted && (
+              <div className="text-red-500 text-sm">
+                Você deve aceitar os Termos e Condições de Uso para continuar.
+              </div>
+            )}
+            {/* New error message for Privacy Policy */}
+            {!privacyPolicySpecificAccepted && (
               <div className="text-red-500 text-sm">
                 Você deve aceitar a Política de Privacidade para continuar.
               </div>
             )}
             <div className="flex place-content-center">
               <button
-                disabled={
-                  !privacyPolicyAccepted ||
+                disabled={ // Updated disabled condition
+                  !termsCondAccepted ||
+                  !privacyPolicySpecificAccepted || // Added new condition
                   !name ||
                   !email ||
                   !password ||
@@ -196,7 +257,8 @@ export default function Register() {
                 }
                 type="submit"
                 className={`text-white flex justify-center items-center rounded-md h-14 w-fit min-w-[20rem] hover:cursor-pointer hover:scale-115 transition-all active:scale-90 ${
-                  !privacyPolicyAccepted ||
+                  !termsCondAccepted ||
+                  !privacyPolicySpecificAccepted || // Added new condition
                   !name ||
                   !email ||
                   !password ||
@@ -214,10 +276,10 @@ export default function Register() {
         </form>
       </div>
       <TermsModal
-        isOpen={isTermsModalOpen}
-        onClose={() => setIsTermsModalOpen(false)}
-        onAccept={handleAcceptTerms}
-        onDecline={handleDeclineTerms}
+        isOpen={isPolicyModalOpen} // Updated prop
+        onClose={() => setIsPolicyModalOpen(false)} // Updated prop
+        onAccept={handleModalAccept} // Updated prop
+        onDecline={handleModalDecline} // Updated prop
       />
     </main>
   );

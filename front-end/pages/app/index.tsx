@@ -2,16 +2,31 @@ import "@/app/globals.css";
 import { useRouter } from "next/router";
 import { FaUserCircle } from "react-icons/fa"; // Ícone de usuário
 import { IoMdMail } from "react-icons/io"; // Ícone de assinatura (Subscribe)
+import { useEffect } from "react"; // Import useEffect
 
 export default function Newsletter() {
   const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleSettings = () => {
     router.push("/app/settings"); // Redireciona para a página de configurações
   };
 
-  const handleSubscribe = () => {
-    alert("Inscrito na Newsletter!"); // Aqui você pode implementar sua lógica de inscrição
+  const handleSubscribe = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      
+      alert("Inscrito na Newsletter com sucesso!");
+    } catch (error) {
+      console.error("Falha ao se inscrever na Newsletter:", error);
+      alert("Ocorreu um erro ao tentar se inscrever na Newsletter.");
+    }
   };
 
   return (

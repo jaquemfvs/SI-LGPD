@@ -60,24 +60,31 @@ const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccept, onDe
         >
           <TermsAndPrivacyContent />
         </div>
-        <div className="flex justify-end gap-4 pt-4 border-t border-gray-200">
-          <button
-            onClick={onDecline}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={onAccept}
-            disabled={!hasScrolledToBottom}
-            className={`px-4 py-2 text-white rounded-md transition-colors ${
-              hasScrolledToBottom
-                ? 'bg-blue-500 hover:bg-blue-600'
-                : 'bg-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Aceitar
-          </button>
+        <div className="flex flex-col items-end">
+          {!hasScrolledToBottom && (
+            <p className="text-xs text-gray-500 mb-2">
+              Role até o final para habilitar o botão "Aceitar".
+            </p>
+          )}
+          <div className="flex justify-end gap-4 pt-4 border-t border-gray-200 w-full">
+            <button
+              onClick={onDecline}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onAccept}
+              disabled={!hasScrolledToBottom}
+              className={`px-4 py-2 text-white rounded-md transition-colors ${
+                hasScrolledToBottom
+                  ? 'bg-blue-500 hover:bg-blue-600'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Aceitar
+            </button>
+          </div>
         </div>
       </div>
     </div>
