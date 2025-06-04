@@ -280,6 +280,7 @@ export default function Register() {
         onClose={() => setIsPolicyModalOpen(false)} // Updated prop
         onAccept={handleModalAccept} // Updated prop
         onDecline={handleModalDecline} // Updated prop
+        modalFocus={modalFocus!} // Pass the modalFocus state
       />
     </main>
   );

@@ -6,13 +6,13 @@ const PrivacyPolicyContent: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">Política de Privacidade</h1>
 
       <p className="mb-3">
-        Na [Empresa], privacidade e segurança são prioridades e nos comprometemos com a transparência do tratamento de dados pessoais dos nossos usuários/clientes. Por isso, esta presente Política de Privacidade estabelece como é feita a coleta, uso e transferência de informações de clientes ou outras pessoas que acessam ou usam nosso site.
+        Na Newsletter, privacidade e segurança são prioridades e nos comprometemos com a transparência do tratamento de dados pessoais dos nossos usuários/clientes. Por isso, esta presente Política de Privacidade estabelece como é feita a coleta, uso e transferência de informações de clientes ou outras pessoas que acessam ou usam nosso site.
       </p>
       <p className="mb-3">
         Ao utilizar nossos serviços, você entende que coletaremos e usaremos suas informações pessoais nas formas descritas nesta Política, sob as normas da Constituição Federal de 1988 (art. 5º, LXXIX; e o art. 22º, XXX – incluídos pela EC 115/2022), das normas de Proteção de Dados (LGPD, Lei Federal 13.709/2018), das disposições consumeristas da Lei Federal 8078/1990 e as demais normas do ordenamento jurídico brasileiro aplicáveis.
       </p>
       <p className="mb-3">
-        Dessa forma, a [Empresa] LTDA, doravante denominada simplesmente como [fantasia], inscrita no CNPJ/MF sob o nº 00.000.000/0001-00, no papel de Controladora de Dados, obriga-se ao disposto na presente Política de Privacidade.
+        Dessa forma, a Newsletter LTDA, doravante denominada simplesmente como [fantasia], inscrita no CNPJ/MF sob o nº 00.000.000/0001-00, no papel de Controladora de Dados, obriga-se ao disposto na presente Política de Privacidade.
       </p>
 
       <h2 className="text-xl font-semibold mb-2">1. Quais dados coletamos sobre você e para qual finalidade?</h2>
@@ -43,13 +43,13 @@ const PrivacyPolicyContent: React.FC = () => {
       </ul>
       <h3 className="text-lg font-semibold mb-1">2.1. Consentimento</h3>
       <p className="mb-3">
-        É a partir do seu consentimento que tratamos os seus dados pessoais. O consentimento é a manifestação livre, informada e inequívoca pela qual você autoriza a [Empresa] a tratar seus dados.
+        É a partir do seu consentimento que tratamos os seus dados pessoais. O consentimento é a manifestação livre, informada e inequívoca pela qual você autoriza a Newsletter a tratar seus dados.
       </p>
       <p className="mb-3">
         Assim, em consonância com a LGPD, seus dados só serão coletados, tratados e armazenados mediante prévio e expresso consentimento.
       </p>
       <p className="mb-3">
-        Ao utilizar os serviços da [Empresa] e fornecer seus dados pessoais, você está ciente e consentindo com as disposições desta Política de Privacidade, além de conhecer seus direitos e como exercê-los.
+        Ao utilizar os serviços da Newsletter e fornecer seus dados pessoais, você está ciente e consentindo com as disposições desta Política de Privacidade, além de conhecer seus direitos e como exercê-los.
       </p>
       <p className="mb-3">
         A qualquer tempo e sem nenhum custo, você poderá revogar seu consentimento.
@@ -57,7 +57,7 @@ const PrivacyPolicyContent: React.FC = () => {
 
       <h2 className="text-xl font-semibold mb-2">3. Quais são os seus direitos?</h2>
       <p className="mb-3">
-        A [Empresa] assegura a seus usuários seus direitos de titular previstos no artigo 18 da LGPD. Você pode:
+        A Newsletter assegura a seus usuários seus direitos de titular previstos no artigo 18 da LGPD. Você pode:
       </p>
       <ul className="list-disc list-inside ml-4 mb-3">
         <li>Confirmar a existência de tratamento.</li>
@@ -75,8 +75,7 @@ const PrivacyPolicyContent: React.FC = () => {
         Você pode exercer seus direitos através dos seguintes canais:
       </p>
       <ul className="list-disc list-inside ml-4 mb-3">
-        <li>E-mail: privacidade@[Empresa].com</li>
-        <li>Formulário de contato: https://[Empresa].com/contato</li>
+        <li>E-mail: privacidade@Newsletter.com</li>
       </ul>
       <p className="mb-3">
         Poderemos solicitar comprovações de identidade para atender sua solicitação com segurança.
@@ -122,7 +121,7 @@ const PrivacyPolicyContent: React.FC = () => {
 
       <h2 className="text-xl font-semibold mb-2">8. Cookies ou dados de navegação</h2>
       <p className="mb-3">
-        A [Empresa] utiliza cookies para:
+        A Newsletter utiliza cookies para:
       </p>
       <ul className="list-disc list-inside ml-4 mb-3">
         <li>Lembrar preferências do usuário.</li>
@@ -132,10 +131,10 @@ const PrivacyPolicyContent: React.FC = () => {
 
       <h2 className="text-xl font-semibold mb-2">9. Alteração desta Política de Privacidade</h2>
       <p className="mb-3">
-        Esta Política foi atualizada pela última vez em [Data].
+        Esta Política foi atualizada pela última vez em 04/06/2025.
       </p>
       <p className="mb-3">
-        A [Empresa] se reserva o direito de modificar esta Política a qualquer momento, sendo as alterações válidas a partir de sua publicação.
+        A Newsletter se reserva o direito de modificar esta Política a qualquer momento, sendo as alterações válidas a partir de sua publicação.
       </p>
 
       <h2 className="text-xl font-semibold mb-2">10. Responsabilidade</h2>
@@ -154,8 +153,8 @@ const PrivacyPolicyContent: React.FC = () => {
 
       <h2 className="text-xl font-semibold mb-2">11. Encarregado de Proteção de Dados</h2>
       <p className="mb-3">
-        Encarregado: [Pessoa] (CPF: 000.000.000-00)<br />
-        E-mail: dpo@[Empresa].com
+        Encarregado: Arthur Silva (CPF: 123.456.789-00)<br />
+        E-mail: dpo@Newsletter.com
       </p>
     </div>
   );

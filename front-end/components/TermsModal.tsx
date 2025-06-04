@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import TermsAndPrivacyContent from './TermsAndPrivacyContent';
+import TermsAndPrivacyContent from './TermsAndPrivacyContent'; // This component displays Terms and Conditions
+import PrivacyPolicyContent from './PrivacyPolicyContent'; // Import Privacy Policy content
 
 interface TermsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAccept: () => void;
   onDecline: () => void;
+  modalFocus: 'terms' | 'privacy'; // Add modalFocus to determine content
 }
 
-const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccept, onDecline }) => {
+const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccept, onDecline, modalFocus }) => {
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +60,7 @@ const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose, onAccept, onDe
           onScroll={handleScroll}
           className="overflow-y-auto flex-grow mb-4 pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
         >
-          <TermsAndPrivacyContent />
+          {modalFocus === 'privacy' ? <PrivacyPolicyContent /> : <TermsAndPrivacyContent />}
         </div>
         <div className="flex flex-col items-end">
           {!hasScrolledToBottom && (
