@@ -44,10 +44,9 @@ class requestHandler {
 
   getUserInfo = async (req, res) => {
     try {
-      // The user information is attached to the request object by the authMiddleware
       const user = await User.findOne({
         where: { id: req.user.id },
-        attributes: { exclude: ["password"] }, // Exclude password from the result
+        attributes: { exclude: ["password"] },
       });
       if (!user) {
         return res.status(404).json({ message: "User not found." });

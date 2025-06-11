@@ -54,10 +54,9 @@ export default function Newsletter() {
         alert("Você precisa estar logado para se inscrever.");
         return;
       }
-      // Make the API call to subscribe
       await axios.put(
-        "http://localhost:3200/user/subscription",
-        { subscribed: true }, // Request body
+        "http://localhost:3200/user/subscription?subscribe=true",
+        {},
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -65,8 +64,6 @@ export default function Newsletter() {
         }
       );
       alert("Inscrito na Newsletter com sucesso!");
-      // Optionally, update local user data state if the API returns the updated user
-      // Or re-fetch user data
       setUserData(prevData => prevData ? ({ ...prevData, subscribedToNewsletter: true }) : null);
     } catch (error) {
       console.error("Falha ao se inscrever na Newsletter:", error);
