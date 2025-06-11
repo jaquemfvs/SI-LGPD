@@ -38,7 +38,6 @@ class triggerEmailService {
             month: 'short',
             year: 'numeric',
         }).format((new Date()));
-        console.log(now);
         const emailSubject = `Security Notice: Possible Data Breach (${now})`
         const emailBody = "We recently detected unauthorized access to our systems, and your account information may have been affected.\n"
                         + "As a precaution, we recommend changing your password and staying alert for suspicious emails.\n"
