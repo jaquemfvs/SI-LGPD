@@ -166,9 +166,39 @@ export default function UserSettings() {
         >
           Alterar consentimento dos termos
         </button>
-      </div>
+        {/* Botão de deletar conta */}
+<button
+  onClick={async () => {
+    const confirmDelete = confirm("Tem certeza que deseja deletar sua conta? Essa ação é irreversível.");
+    if (!confirmDelete) return;
 
-      {/* Botão de logout no canto inferior direito */}
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Você precisa estar logado.");
+      return;
+    }
+
+    try {
+      await axios.delete("http://localhost:3200/user/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert("Conta deletada com sucesso.");
+      localStorage.clear();
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      router.push("/");
+    } catch (error) {
+      alert("Erro ao deletar a conta.");
+      console.error(error);
+    }
+  }}
+  className="mt-2 w-full bg-red-600 text-white p-2 rounded hover:bg-red-700 transition-colors"
+>
+  Deletar minha conta
+</button>
+      </div>
+       {/* Botão de logout no canto inferior direito */}
       <button
         onClick={handleLogout}
         className="absolute bottom-4 right-4 bg-red-500 text-white p-2 rounded hover:scale-105 transition-all active:scale-90"

@@ -8,26 +8,26 @@ module.exports = (sequelize, DataTypes) => {
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true, 
+      allowNull: true,
+      unique: true,
       validate: {
-        isEmail: true, 
+        isEmail: true,
       },
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
-    }, 
+      allowNull: true,
+    },
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
-    }, 
+    },
     agreedToPromotionalEmails: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-    }, 
+    },
     subscribedToNewsletter: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
