@@ -6,21 +6,44 @@ class anonymizeService {
     await deletedUser.create({ userId });
     const user = await User.findOne({ where: { id: userId } });
     if (user) {
-      await user.update({ email: null, password: null, active: false });
+      await user.update({
+        name: null,
+        email: null,
+        password: null,
+        active: false,
+      });
     }
   }
-  forceAnonymizeAll = async (req, res) => {
+  forceAnonymizeAll = async () => {
     try {
       const deletedUsers = await deletedUser.find({});
       for (const entry of deletedUsers) {
-        await this.anonymizeUserInSQL(entry.userId);
+        const user = await User.findOne({ where: { id: entry.userId } });
+        if (user) {
+          const alreadyAnonymized =
+            user.name === null &&
+            user.email === null &&
+            user.password === null &&
+            user.active === false;
+
+          if (alreadyAnonymized) {
+            await deletedUser.deleteOne({ userId: entry.userId });
+          } else {
+            await user.update({
+              name: null,
+              email: null,
+              password: null,
+              active: false,
+            });
+          }
+        }
       }
-      res
-        .status(200)
-        .json({ message: "All users in MongoDB have been anonymized in SQL." });
     } catch (err) {
       console.log(err);
-      res.status(500).json({ error: "Failed to force anonymize users." });
+      return {
+        success: false,
+        message: "An error occurred while anonymizing users.",
+      };
     }
   };
 }

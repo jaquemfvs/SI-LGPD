@@ -4,20 +4,20 @@ const anonymizeService = require("../services/anonymize.service.js");
 class requestHandler {
   // POST
   registerUser = async (req, res) => {
-    const { email, password, agreedToPromotionalEmails } = req.body;
-    if (!email || !password) {
+    const { name, email, password, agreedToPromotionalEmails } = req.body;
+    if (!email || !password || !name) {
       return res
         .status(400)
-        .json({ message: "Todos os campos são obrigatórios." });
+        .json({ message: "Os campos email,senha e nome são obrigatórios." });
     }
 
     const user = {
+      name,
       email,
       password: await service.getHashed(password),
       agreedToPromotionalEmails,
     };
 
-    // Create user
     User.create(user)
       .then(() => {
         res.status(201).send();
