@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 class BackupService {
-  backupDatabase = ()=>{
+  backupDatabase = async ()=>{
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupDir = path.join(__dirname, '..', 'db_backups');
     if (!fs.existsSync(backupDir)) {
@@ -33,7 +33,7 @@ class BackupService {
       console.log(`Database backed up to ${backupFile}`);
     });
   }
-  restoreMostRecentDatabase = ()=>{
+  restoreMostRecentDatabase = async ()=>{
     const backupDir = path.join(__dirname, '..', 'db_backups');
     if (!fs.existsSync(backupDir)) {
       fs.mkdirSync(backupDir, { recursive: true });
@@ -54,7 +54,7 @@ class BackupService {
     console.log(`Latest backup found: ${files[0].name}`);
     this.restoreDatabase(latest);
   }
-  restoreDatabase = (dumpFilePath)=>{
+  restoreDatabase = async (dumpFilePath)=>{
     const restoreCommand = `mysql -h ${process.env.DB_HOST} -u ${process.env.DB_USER} -p${process.env.DB_PASSWORD} ${process.env.DB_NAME} < ${dumpFilePath}`;
     exec(restoreCommand, (error, stdout, stderr) => {
       if (error) {
