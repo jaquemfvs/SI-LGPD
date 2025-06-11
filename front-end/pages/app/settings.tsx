@@ -17,8 +17,8 @@ export default function UserSettings() {
 
   const [userData, setUserData] = useState<UserData>({
     id: 0,
-    email: '',
-    name: '',
+    email: "",
+    name: "",
     subscribedToNewsletter: false,
     agreedToPromotionalEmails: false,
   });
@@ -54,10 +54,8 @@ export default function UserSettings() {
 
   const handleUpdate = () => {
     alert("Informações atualizadas com sucesso!");
-    // Aqui você pode adicionar lógica para enviar os dados ao backend
   };
 
-  // Toggle promotional emails
   const handlePromotionalEmailsToggle = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -108,7 +106,7 @@ export default function UserSettings() {
           <input
             type="text"
             name="name"
-            value={userData.name || ''}
+            value={userData.name || ""}
             onChange={handleChange}
             className="w-full p-2 border rounded mt-2"
           />
@@ -119,7 +117,7 @@ export default function UserSettings() {
           <input
             type="email"
             name="email"
-            value={userData.email || ''}
+            value={userData.email || ""}
             onChange={handleChange}
             className="w-full p-2 border rounded mt-2"
           />
@@ -133,7 +131,6 @@ export default function UserSettings() {
         </button>
       </div>
 
-
       {/* Legal and marketing options - outside the form */}
       <div className="flex flex-col gap-2 mb-4 mt-4 bg-white p-4 rounded-md max-w-md w-full">
         <div className="flex items-center">
@@ -144,61 +141,72 @@ export default function UserSettings() {
             onChange={handlePromotionalEmailsToggle}
             className="mr-2"
           />
-          <label htmlFor="promotionalEmails">Receber e-mails promocionais</label>
+          <label htmlFor="promotionalEmails">
+            Receber e-mails promocionais
+          </label>
         </div>
         <div className="flex items-center">
-          <span className="mr-2 text-green-600 font-bold text-lg">✔</span>
           <span>
-            Aceito os&nbsp;
-            <span className="text-blue-500 underline cursor-pointer" onClick={() => alert('Abrir Termos de Uso (implementar modal)')}>Termos de Uso</span>
+            <span
+              className="text-blue-500 underline cursor-pointer"
+              onClick={() => alert("Abrir Termos de Uso (implementar modal)")}
+            >
+              Termos de Uso
+            </span>
           </span>
         </div>
         <div className="flex items-center">
-          <span className="mr-2 text-green-600 font-bold text-lg">✔</span>
           <span>
-            Aceito a&nbsp;
-            <span className="text-blue-500 underline cursor-pointer" onClick={() => alert('Abrir Política de Privacidade (implementar modal)')}>Política de Privacidade</span>
+            <span
+              className="text-blue-500 underline cursor-pointer"
+              onClick={() =>
+                alert("Abrir Política de Privacidade (implementar modal)")
+              }
+            >
+              Política de Privacidade
+            </span>
           </span>
         </div>
-        <button
-          className="mt-4 w-full bg-gray-200 text-gray-800 p-2 rounded hover:bg-gray-300 transition-colors"
-          onClick={() => alert('Alterar consentimento dos termos (implementar ação/modal)')}
-        >
-          Alterar consentimento dos termos
-        </button>
         {/* Botão de deletar conta */}
-<button
-  onClick={async () => {
-    const confirmDelete = confirm("Tem certeza que deseja deletar sua conta? Essa ação é irreversível.");
-    if (!confirmDelete) return;
+        <button
+          onClick={async () => {
+            const confirmDelete = confirm(
+              "Tem certeza que deseja deletar sua conta? Essa ação é irreversível."
+            );
+            if (!confirmDelete) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Você precisa estar logado.");
-      return;
-    }
+            const token = localStorage.getItem("token");
+            if (!token) {
+              alert("Você precisa estar logado.");
+              return;
+            }
 
-    try {
-      await axios.delete("http://localhost:3200/user/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      alert("Conta deletada com sucesso.");
-      localStorage.clear();
-      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      router.push("/");
-    } catch (error) {
-      alert("Erro ao deletar a conta.");
-      console.error(error);
-    }
-  }}
-  className="mt-2 w-full bg-red-600 text-white p-2 rounded hover:bg-red-700 transition-colors"
->
-  Deletar minha conta
-</button>
+            try {
+              await axios.put(
+                "http://localhost:3200/user/deactivate",
+                {},
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                }
+              );
+              alert("Conta deletada com sucesso.");
+              localStorage.clear();
+              document.cookie =
+                "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+              router.push("/");
+            } catch (error) {
+              alert("Erro ao deletar a conta.");
+              console.error(error);
+            }
+          }}
+          className="mt-2 w-full bg-red-600 text-white p-2 rounded hover:bg-red-700 transition-colors"
+        >
+          Deletar minha conta
+        </button>
       </div>
-       {/* Botão de logout no canto inferior direito */}
+      {/* Botão de logout no canto inferior direito */}
       <button
         onClick={handleLogout}
         className="absolute bottom-4 right-4 bg-red-500 text-white p-2 rounded hover:scale-105 transition-all active:scale-90"

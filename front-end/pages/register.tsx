@@ -11,16 +11,16 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordsMatch, setPasswordsMatch] = useState(true);
-  const [agreedToPromotionalEmails, setagreedToPromotionalEmails] = useState(false);
-  // Renamed state for Terms and Conditions
+  const [agreedToPromotionalEmails, setagreedToPromotionalEmails] =
+    useState(false);
   const [termsCondAccepted, setTermsCondAccepted] = useState(false);
-  // New state for Privacy Policy specific acceptance
-  const [privacyPolicySpecificAccepted, setPrivacyPolicySpecificAccepted] = useState(false);
+  const [privacyPolicySpecificAccepted, setPrivacyPolicySpecificAccepted] =
+    useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
-  // Renamed state for modal visibility
   const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
-  // New state to track which content the modal is for ('terms' or 'privacy')
-  const [modalFocus, setModalFocus] = useState<'terms' | 'privacy' | null>(null);
+  const [modalFocus, setModalFocus] = useState<"terms" | "privacy" | null>(
+    null
+  );
 
   const router = useRouter();
 
@@ -29,9 +29,10 @@ export default function Register() {
 
     try {
       const response = await axios.post("http://localhost:3200/user/register", {
+        name,
         email,
         password,
-        agreedToPromotionalEmails
+        agreedToPromotionalEmails,
       });
       alert("Conta criada com sucesso!");
       router.push("/");
@@ -60,7 +61,7 @@ export default function Register() {
   // Renamed handler for Terms and Conditions checkbox change
   const handleTermsCondChange = () => {
     if (!termsCondAccepted) {
-      setModalFocus('terms');
+      setModalFocus("terms");
       setIsPolicyModalOpen(true);
     } else {
       setTermsCondAccepted(false);
@@ -70,7 +71,7 @@ export default function Register() {
   // New handler for Privacy Policy specific checkbox change
   const handlePrivacyPolicySpecificChange = () => {
     if (!privacyPolicySpecificAccepted) {
-      setModalFocus('privacy');
+      setModalFocus("privacy");
       setIsPolicyModalOpen(true);
     } else {
       setPrivacyPolicySpecificAccepted(false);
@@ -79,9 +80,9 @@ export default function Register() {
 
   // Renamed and updated modal accept handler
   const handleModalAccept = () => {
-    if (modalFocus === 'terms') {
+    if (modalFocus === "terms") {
       setTermsCondAccepted(true);
-    } else if (modalFocus === 'privacy') {
+    } else if (modalFocus === "privacy") {
       setPrivacyPolicySpecificAccepted(true);
     }
     setIsPolicyModalOpen(false);
@@ -89,9 +90,9 @@ export default function Register() {
 
   // Renamed and updated modal decline handler
   const handleModalDecline = () => {
-    if (modalFocus === 'terms') {
+    if (modalFocus === "terms") {
       setTermsCondAccepted(false);
-    } else if (modalFocus === 'privacy') {
+    } else if (modalFocus === "privacy") {
       setPrivacyPolicySpecificAccepted(false);
     }
     setIsPolicyModalOpen(false);
@@ -179,7 +180,9 @@ export default function Register() {
                   type="checkbox"
                   id="offers"
                   checked={agreedToPromotionalEmails}
-                  onChange={() => setagreedToPromotionalEmails(!agreedToPromotionalEmails)}
+                  onChange={() =>
+                    setagreedToPromotionalEmails(!agreedToPromotionalEmails)
+                  }
                   className="ml-2"
                 />
                 <label htmlFor="offers">
@@ -195,11 +198,13 @@ export default function Register() {
                   onChange={handleTermsCondChange} // Updated handler
                   className="ml-2"
                 />
-                <label htmlFor="terms_conditions" className="cursor-pointer"> {/* Changed htmlFor for clarity */}
+                <label htmlFor="terms_conditions" className="cursor-pointer">
+                  {" "}
+                  {/* Changed htmlFor for clarity */}
                   Li e aceito os&nbsp;
                   <span
                     onClick={() => {
-                      setModalFocus('terms');
+                      setModalFocus("terms");
                       setIsPolicyModalOpen(true);
                     }} // Updated to set focus and open modal
                     className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
@@ -217,11 +222,14 @@ export default function Register() {
                   onChange={handlePrivacyPolicySpecificChange}
                   className="ml-2"
                 />
-                <label htmlFor="privacy_policy_specific" className="cursor-pointer">
+                <label
+                  htmlFor="privacy_policy_specific"
+                  className="cursor-pointer"
+                >
                   Li e aceito a&nbsp;
                   <span
                     onClick={() => {
-                      setModalFocus('privacy');
+                      setModalFocus("privacy");
                       setIsPolicyModalOpen(true);
                     }}
                     className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
@@ -245,7 +253,8 @@ export default function Register() {
             )}
             <div className="flex place-content-center">
               <button
-                disabled={ // Updated disabled condition
+                disabled={
+                  // Updated disabled condition
                   !termsCondAccepted ||
                   !privacyPolicySpecificAccepted || // Added new condition
                   !name ||
