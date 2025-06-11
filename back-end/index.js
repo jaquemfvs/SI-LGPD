@@ -10,6 +10,7 @@ app.use(express.json())
 
 app.use('/user', require('./routes/user.routes'));
 app.use('/email', require('./routes/email.routes'));
+app.use('/security', require('./routes/security.routes'));
 
 db.sequelize.sync().then(()=>{
   app.listen(PORT, ()=>console.log(`Server running on https://localhost:${PORT}`));
