@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require("path");
 const { spawn } = require('child_process');
 const mysql = require('mysql2/promise');
 const emailService = require("./email.services.js");
@@ -7,8 +8,31 @@ function log(msg) {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${msg}`);
 }
-async function restoreDatabase(sqlFilePath) {
-  return new Promise((resolve, reject) => {
+async function getMostRecentBackup() {
+    const backupDir = path.join(__dirname, "db_backups");
+    if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir, { recursive: true });
+    }
+
+    const files = fs
+        .readdirSync(backupDir)
+        .filter((f) => f.endsWith(".sql"))
+        .map((f) => ({
+        name: f,
+        time: fs.statSync(path.join(backupDir, f)).mtime.getTime(),
+        }))
+        .sort((a, b) => b.time - a.time);
+    if (files.length === 0) {
+        console.log("No backup files found to restore.");
+        return;
+    }
+    const latest = path.join(backupDir, files[0].name);
+    
+    return latest;
+}
+async function restoreDatabase() {
+  return new Promise(async (resolve, reject) => {
+    const sqlFilePath = await getMostRecentBackup();
     log(`Restoring database from: ${sqlFilePath}`);
 
     const restore = spawn('mysql', [
@@ -65,16 +89,9 @@ async function triggerBreachNotificationEmail(emailRecipient) {
 }
 
 async function runCLI() {
-  const sqlFile = process.argv[2];
-  if (!sqlFile || !fs.existsSync(sqlFile)) {
-    console.error('Usage: node notify-breach.js <path-to-backup.sql>');
-    process.exit(1);
-  }
-
   try {
     log('Process started.');
-
-    await restoreDatabase(sqlFile);
+    await restoreDatabase();
     const users = await fetchUsers();
     log(`Found ${users.length} user(s) to notify.`);
 
