@@ -8,6 +8,7 @@ function log(msg) {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${msg}`);
 }
+
 async function getMostRecentBackup() {
     const backupDir = path.join(__dirname, "db_backups");
     if (!fs.existsSync(backupDir)) {
@@ -36,10 +37,7 @@ async function restoreDatabase() {
     log(`Restoring database from: ${sqlFilePath}`);
 
     const restore = spawn('mysql', [
-      '-h', process.env.DB_HOST,
-      '-u', process.env.DB_USER,
-      `-p${process.env.DB_PASSWORD}`,
-      process.env.DB_NAME
+        `--defaults-extra-file=${path.resolve(__dirname, 'mysql-config.cnf')}`
     ]);
 
     const stream = fs.createReadStream(sqlFilePath);
@@ -57,6 +55,7 @@ async function restoreDatabase() {
     });
   });
 }
+
 async function fetchUsers() {
   const connection = await mysql.createConnection({
     host: process.env.DB_HOST,
