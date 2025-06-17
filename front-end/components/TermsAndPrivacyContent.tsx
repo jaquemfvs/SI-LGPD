@@ -1,9 +1,12 @@
 import React from 'react';
 
 const TermsAndConditionsContent: React.FC = () => {
+  const version = "1.0"; // Define the version of the terms and conditions
+
   return (
     <div className="prose max-w-none">
       <h1 className="text-2xl font-bold mb-4">Termos e Condições Gerais de Uso da Plataforma de Newsletter</h1>
+      <p className="text-sm text-gray-500 mb-4">Versão: {version}</p>
 
       <p className="mb-3">
         Os serviços da Plataforma Newsletter são fornecidos pela pessoa jurídica com a seguinte razão social: [Nome da Razão Social], com nome fantasia [Nome Fantasia], inscrita no CNPJ sob o nº [CNPJ], titular da propriedade intelectual sobre o software, website, conteúdos e demais ativos relacionados à plataforma Newsletter.

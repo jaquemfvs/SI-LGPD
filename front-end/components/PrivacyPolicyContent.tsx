@@ -1,9 +1,12 @@
 import React from 'react';
 
 const PrivacyPolicyContent: React.FC = () => {
+  const version = "1.0"; // Define the version of the privacy policy
+
   return (
     <div className="prose max-w-none">
       <h1 className="text-2xl font-bold mb-4">Política de Privacidade</h1>
+      <p className="text-sm text-gray-500 mb-4">Versão: {version}</p>
 
       <p className="mb-3">
         Na Newsletter, privacidade e segurança são prioridades e nos comprometemos com a transparência do tratamento de dados pessoais dos nossos usuários/clientes. Por isso, esta presente Política de Privacidade estabelece como é feita a coleta, uso e transferência de informações de clientes ou outras pessoas que acessam ou usam nosso site.

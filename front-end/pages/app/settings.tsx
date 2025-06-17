@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { FaUserCircle } from "react-icons/fa"; // Ícone de usuário
 import axios from "axios";
+import ViewOnlyModal from "../../components/ViewOnlyModal";
 
 interface UserData {
   id: number;
@@ -10,6 +11,11 @@ interface UserData {
   name?: string;
   subscribedToNewsletter?: boolean;
   agreedToPromotionalEmails?: boolean;
+  termsOfUseVersionAccepted?: string;
+  termsOfUseLastUpdatedAt?: string;
+  privacyPolicyVersionAccepted?: string;
+  privacyPolicyLastUpdatedAt?: string;
+  promotionalEmailsLastUpdatedAt?: string;
 }
 
 export default function UserSettings() {
@@ -21,7 +27,15 @@ export default function UserSettings() {
     name: "",
     subscribedToNewsletter: false,
     agreedToPromotionalEmails: false,
+    termsOfUseVersionAccepted: "",
+    termsOfUseLastUpdatedAt: "",
+    privacyPolicyVersionAccepted: "",
+    privacyPolicyLastUpdatedAt: "",
+    promotionalEmailsLastUpdatedAt: "",
   });
+
+  const [isViewOnlyModalOpen, setIsViewOnlyModalOpen] = useState(false);
+  const [viewOnlyModalFocus, setViewOnlyModalFocus] = useState<"terms" | "privacy" | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -64,8 +78,9 @@ export default function UserSettings() {
     }
     try {
       const newValue = !userData.agreedToPromotionalEmails;
+      const currentTime = new Date();
       await axios.put(
-        `http://localhost:3200/user/promotionalEmails?permit=${newValue}`,
+        `http://localhost:3200/user/promotionalEmails?permit=${newValue}&updatedAt=${currentTime.toISOString()}`,
         {},
         {
           headers: {
@@ -73,7 +88,14 @@ export default function UserSettings() {
           },
         }
       );
-      setUserData({ ...userData, agreedToPromotionalEmails: newValue });
+
+      // Fetch updated user data
+      const response = await axios.get("http://localhost:3200/user/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserData(response.data);
     } catch (error) {
       alert("Erro ao atualizar preferência de e-mails promocionais.");
     }
@@ -83,6 +105,15 @@ export default function UserSettings() {
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     localStorage.removeItem("userData");
     router.push("/");
+  };
+
+  const openViewOnlyModal = (focus: "terms" | "privacy") => {
+    setViewOnlyModalFocus(focus);
+    setIsViewOnlyModalOpen(true);
+  };
+
+  const closeViewOnlyModal = () => {
+    setIsViewOnlyModalOpen(false);
   };
 
   return (
@@ -145,26 +176,63 @@ export default function UserSettings() {
             Receber e-mails promocionais
           </label>
         </div>
-        <div className="flex items-center">
+        <div className="flex flex-col">
           <span>
+            Termos de Uso:
             <span
               className="text-blue-500 underline cursor-pointer"
-              onClick={() => alert("Abrir Termos de Uso (implementar modal)")}
+              onClick={() => openViewOnlyModal("terms")}
             >
-              Termos de Uso
+              {userData.termsOfUseVersionAccepted
+                ? ` Versão ${userData.termsOfUseVersionAccepted}`
+                : " Não aceito"}
             </span>
           </span>
+          <span className="text-gray-600">
+            {userData.termsOfUseLastUpdatedAt
+              ? `Termo aceitado em: ${new Date(
+                  userData.termsOfUseLastUpdatedAt
+                ).toLocaleString()}`
+              : "Termo recusado em: Não disponível"}
+          </span>
         </div>
-        <div className="flex items-center">
+        <div className="flex flex-col">
           <span>
+            Política de Privacidade:
             <span
               className="text-blue-500 underline cursor-pointer"
-              onClick={() =>
-                alert("Abrir Política de Privacidade (implementar modal)")
-              }
+              onClick={() => openViewOnlyModal("privacy")}
             >
-              Política de Privacidade
+              {userData.privacyPolicyVersionAccepted
+                ? ` Versão ${userData.privacyPolicyVersionAccepted}`
+                : " Não aceito"}
             </span>
+          </span>
+          <span className="text-gray-600">
+            {userData.privacyPolicyLastUpdatedAt
+              ? `Termo aceitado em: ${new Date(
+                  userData.privacyPolicyLastUpdatedAt
+                ).toLocaleString()}`
+              : "Termo recusado em: Não disponível"}
+          </span>
+        </div>
+        <div className="flex flex-col">
+          <span>
+            E-mails Promocionais:
+            <span className="text-gray-600">
+              {userData.agreedToPromotionalEmails ? " Aceito" : " Não aceito"}
+            </span>
+          </span>
+          <span className="text-gray-600">
+            {userData.promotionalEmailsLastUpdatedAt
+              ? userData.agreedToPromotionalEmails
+                ? `Termo aceitado em: ${new Date(
+                    userData.promotionalEmailsLastUpdatedAt
+                  ).toLocaleString()}`
+                : `Termo recusado em: ${new Date(
+                    userData.promotionalEmailsLastUpdatedAt
+                  ).toLocaleString()}`
+              : "Não disponível"}
           </span>
         </div>
         {/* Botão de deletar conta */}
@@ -213,6 +281,12 @@ export default function UserSettings() {
       >
         Deslogar
       </button>
+
+      <ViewOnlyModal
+        isOpen={isViewOnlyModalOpen}
+        onClose={closeViewOnlyModal}
+        modalFocus={viewOnlyModalFocus!}
+      />
     </main>
   );
 }

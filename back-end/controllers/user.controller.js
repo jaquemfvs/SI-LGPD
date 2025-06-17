@@ -4,11 +4,21 @@ const anonymizeService = require("../services/anonymize.service.js");
 class requestHandler {
   // POST
   registerUser = async (req, res) => {
-    const { name, email, password, agreedToPromotionalEmails } = req.body;
+    const {
+      name,
+      email,
+      password,
+      agreedToPromotionalEmails,
+      termsOfUseVersionAccepted,
+      privacyPolicyVersionAccepted,
+      termsOfUseLastUpdatedAt,
+      privacyPolicyLastUpdatedAt,
+    } = req.body;
+
     if (!email || !password || !name) {
       return res
         .status(400)
-        .json({ message: "Os campos email,senha e nome são obrigatórios." });
+        .json({ message: "Os campos email, senha e nome são obrigatórios." });
     }
 
     const user = {
@@ -16,6 +26,10 @@ class requestHandler {
       email,
       password: await service.getHashed(password),
       agreedToPromotionalEmails,
+      termsOfUseVersionAccepted,
+      privacyPolicyVersionAccepted,
+      termsOfUseLastUpdatedAt,
+      privacyPolicyLastUpdatedAt,
     };
 
     User.create(user)
@@ -93,11 +107,16 @@ class requestHandler {
   };
   updatePromotionalEmailPreference = (req, res) => {
     let { user, query } = req;
+    const updatedAt = query.updatedAt || new Date().toISOString();
+
     User.findOne({ where: { id: user.id } })
       .then((user) => {
         if (!user) return res.status(404).send();
         user
-          .update({ agreedToPromotionalEmails: query.permit })
+          .update({
+            agreedToPromotionalEmails: query.permit,
+            promotionalEmailsLastUpdatedAt: updatedAt,
+          })
           .then(() => {
             res.status(200).send();
           })
