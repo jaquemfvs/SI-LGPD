@@ -130,6 +130,35 @@ class requestHandler {
         res.status(500).send();
       });
   };
+
+  updateUserById = async (req, res) => {
+    const { body, params, user } = req;
+    const requestedId = parseInt(params.id);
+
+    // Segurança: impede que um usuário edite outro usuário (a menos que seja admin, por exemplo)
+    if (requestedId !== user.id) {
+      return res.status(403).json({ message: "Você só pode editar sua própria conta." });
+    }
+
+    try {
+      const foundUser = await User.findOne({ where: { id: requestedId } });
+      if (!foundUser) return res.status(404).json({ message: "Usuário não encontrado." });
+
+      const updateFields = {};
+      if (body.name) updateFields.name = body.name;
+      if (body.email) updateFields.email = body.email;
+      if (body.password) updateFields.password = await service.getHashed(body.password);
+
+      await foundUser.update(updateFields);
+
+      res.status(200).json({ message: "Usuário atualizado com sucesso." });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Erro ao atualizar usuário." });
+    }
+  };
+
+
 }
 
 module.exports = new requestHandler();

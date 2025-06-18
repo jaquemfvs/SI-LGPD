@@ -1,5 +1,5 @@
 import "@/app/globals.css";
-import { useEffect, useState } from "react";
+import { createRef, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { FaUserCircle } from "react-icons/fa"; // Ícone de usuário
 import axios from "axios";
@@ -36,6 +36,8 @@ export default function UserSettings() {
 
   const [isViewOnlyModalOpen, setIsViewOnlyModalOpen] = useState(false);
   const [viewOnlyModalFocus, setViewOnlyModalFocus] = useState<"terms" | "privacy" | null>(null);
+  const emailRef = createRef<HTMLInputElement>();
+  const nameRef = createRef<HTMLInputElement>();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -66,7 +68,22 @@ export default function UserSettings() {
     });
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
+    const name = nameRef.current?.value;
+    const email = emailRef.current?.value;
+
+    const token = localStorage.getItem("token");
+
+    console.log(name, email);
+    const data = await axios.patch(`http://localhost:3200/user/${userData.id}`, {
+      name: name,
+      email: email
+    },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
     alert("Informações atualizadas com sucesso!");
   };
 
@@ -139,6 +156,7 @@ export default function UserSettings() {
             name="name"
             value={userData.name || ""}
             onChange={handleChange}
+            ref={nameRef}
             className="w-full p-2 border rounded mt-2"
           />
         </label>
@@ -150,6 +168,7 @@ export default function UserSettings() {
             name="email"
             value={userData.email || ""}
             onChange={handleChange}
+            ref={emailRef}
             className="w-full p-2 border rounded mt-2"
           />
         </label>
