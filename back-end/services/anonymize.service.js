@@ -20,22 +20,12 @@ class anonymizeService {
       for (const entry of deletedUsers) {
         const user = await User.findOne({ where: { id: entry.userId } });
         if (user) {
-          const alreadyAnonymized =
-            user.name === null &&
-            user.email === null &&
-            user.password === null &&
-            user.active === false;
-
-          if (alreadyAnonymized) {
-            await deletedUser.deleteOne({ userId: entry.userId });
-          } else {
-            await user.update({
-              name: null,
-              email: null,
-              password: null,
-              active: false,
-            });
-          }
+          await user.update({
+            name: null,
+            email: null,
+            password: null,
+            active: false,
+          });
         }
       }
     } catch (err) {

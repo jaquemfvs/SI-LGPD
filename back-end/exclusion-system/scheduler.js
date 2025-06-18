@@ -1,17 +1,15 @@
 const cron = require("node-cron");
 const { backupMySQL, backupMongoDB } = require("./backup.service.js");
-const {
-  anonymizeUserInSQL,
-  forceAnonymizeAll,
-} = require("../services/anonymize.service.js");
+const { forceAnonymizeAll } = require("../services/anonymize.service.js");
 const DeletedUser = require("../models/mongodb/deletedUser.model.js");
+
+// Is it worth to hold more backups?
+// or is it worth more to host the backups on a cloud service?
+// or is it worth to have multiple mysql/mongo servers with replication?
 
 cron.schedule("0 */6 * * *", async () => {
   console.log("Scheduled backup started...");
   try {
-    console.log("Starting anonymization before backup...");
-    await forceAnonymizeAll();
-    console.log("Anonymization completed before backup.");
     console.log("Starting MySQL backup...");
     await backupMySQL();
     console.log("Scheduled backup finished.");
@@ -20,7 +18,7 @@ cron.schedule("0 */6 * * *", async () => {
   }
 });
 
-cron.schedule("28 * * * *", async () => {
+cron.schedule("0 * * * *", async () => {
   console.log("Scheduled MongoDB backup started...");
   try {
     await backupMongoDB();
