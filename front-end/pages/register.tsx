@@ -21,6 +21,14 @@ export default function Register() {
   const [modalFocus, setModalFocus] = useState<"terms" | "privacy" | null>(
     null
   );
+  const [termsOfUseVersionAccepted, setTermsOfUseVersionAccepted] =
+    useState("1.0");
+  const [privacyPolicyVersionAccepted, setPrivacyPolicyVersionAccepted] =
+    useState("1.0");
+  const [termsOfUseLastUpdatedAt, setTermsOfUseLastUpdatedAt] =
+    useState<Date | null>(null);
+  const [privacyPolicyLastUpdatedAt, setPrivacyPolicyLastUpdatedAt] =
+    useState<Date | null>(null);
 
   const router = useRouter();
 
@@ -33,6 +41,10 @@ export default function Register() {
         email,
         password,
         agreedToPromotionalEmails,
+        termsOfUseVersionAccepted,
+        privacyPolicyVersionAccepted,
+        termsOfUseLastUpdatedAt,
+        privacyPolicyLastUpdatedAt,
       });
       alert("Conta criada com sucesso!");
       router.push("/");
@@ -80,10 +92,13 @@ export default function Register() {
 
   // Renamed and updated modal accept handler
   const handleModalAccept = () => {
+    const currentTime = new Date();
     if (modalFocus === "terms") {
       setTermsCondAccepted(true);
+      setTermsOfUseLastUpdatedAt(currentTime);
     } else if (modalFocus === "privacy") {
       setPrivacyPolicySpecificAccepted(true);
+      setPrivacyPolicyLastUpdatedAt(currentTime);
     }
     setIsPolicyModalOpen(false);
   };

@@ -4,13 +4,9 @@ const authMiddleware = require("../middleware/auth.middleware");
 
 router.post("/register", controller.registerUser);
 router.post("/login", controller.loginUser);
-router.get("/me", authMiddleware, controller.getUserInfo); // New route to get user info
+router.get("/me", authMiddleware, controller.getUserInfo);
 router.put("/subscription", authMiddleware, controller.updateSubscription);
-router.put(
-  "/promotionalEmails",
-  authMiddleware,
-  controller.updatePromotionalEmailPreference
-);
+router.put("/promotionalEmails", authMiddleware, controller.updatePromotionalEmailPreference);
 router.put("/deactivate", authMiddleware, controller.deactivateUser);
 
 module.exports = router;
