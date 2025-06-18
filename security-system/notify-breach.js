@@ -12,7 +12,7 @@ function log(msg) {
 async function getMostRecentBackup() {
     const backupDir = path.join(__dirname, "db_backups");
     if (!fs.existsSync(backupDir)) {
-        fs.mkdirSync(backupDir, { recursive: true });
+      fs.mkdirSync(backupDir, { recursive: true });
     }
 
     const files = fs
@@ -97,7 +97,7 @@ async function runCLI() {
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
       try {
-        // await triggerBreachNotificationEmail(user.email);
+        await triggerBreachNotificationEmail(user.email);
         log(`Email sent to: ${user.email}`);
       } catch (err) {
         log(`Failed to send email to ${user.email}: ${err.message}`);
@@ -105,6 +105,7 @@ async function runCLI() {
     }
 
     log('Process completed.');
+    setTimeout(()=>{}, 600000);
   } catch (err) {
     log(`Fatal error: ${err.message}`);
   }
