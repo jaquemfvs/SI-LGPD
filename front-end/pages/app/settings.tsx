@@ -38,6 +38,9 @@ export default function UserSettings() {
   const [viewOnlyModalFocus, setViewOnlyModalFocus] = useState<"terms" | "privacy" | null>(null);
   const emailRef = createRef<HTMLInputElement>();
   const nameRef = createRef<HTMLInputElement>();
+  const oldPasswordRef = createRef<HTMLInputElement>();
+  const newPasswordRef = createRef<HTMLInputElement>();
+  const newPasswordRef1 = createRef<HTMLInputElement>();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -86,6 +89,45 @@ export default function UserSettings() {
   });
     alert("Informações atualizadas com sucesso!");
   };
+
+  const handleUpdatePassword = async () => {
+  const oldPassword = oldPasswordRef.current?.value;
+  const newPassword = newPasswordRef.current?.value;
+  const newPassword1 = newPasswordRef1.current?.value;
+  const token = localStorage.getItem("token");
+
+  if (!oldPassword || !newPassword) {
+    alert("Preencha os dois campos de senha.");
+    return;
+  }
+
+  if (newPassword !== newPassword1) {
+    alert("As novas senhas não coincidem.");
+    return;
+  }
+
+  try {
+    await axios.patch(
+      `http://localhost:3200/user/${userData.id}`,
+      {
+        password: newPassword
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    alert("Senha atualizada com sucesso!");
+    if (oldPasswordRef.current) oldPasswordRef.current.value = "";
+    if (newPasswordRef.current) newPasswordRef.current.value = "";
+    if (newPasswordRef1.current) newPasswordRef1.current.value = "";
+  } catch (error) {
+    alert("Erro ao atualizar a senha.");
+    console.error(error);
+  }
+};
+
 
   const handlePromotionalEmailsToggle = async () => {
     const token = localStorage.getItem("token");
@@ -148,38 +190,84 @@ export default function UserSettings() {
 
       {/* Área de formulário */}
 
-      <div className="bg-white p-6 rounded-md max-w-md w-full">
-        <label className="block mb-4">
-          Nome Completo:
-          <input
-            type="text"
-            name="name"
-            value={userData.name || ""}
-            onChange={handleChange}
-            ref={nameRef}
-            className="w-full p-2 border rounded mt-2"
-          />
-        </label>
+      <div className="bg-white p-6 rounded-md max-w-4xl w-full flex flex-col md:flex-row gap-4">
+  {/* Coluna 1 - Nome e Email */}
+  <div className="w-full md:w-1/2">
+    <label className="block mb-4">
+      Nome Completo:
+      <input
+        type="text"
+        name="name"
+        value={userData.name || ""}
+        onChange={handleChange}
+        ref={nameRef}
+        className="w-full p-2 border rounded mt-2"
+      />
+    </label>
 
-        <label className="block mb-4">
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={userData.email || ""}
-            onChange={handleChange}
-            ref={emailRef}
-            className="w-full p-2 border rounded mt-2"
-          />
-        </label>
+    <label className="block mb-4">
+      Email:
+      <input
+        type="email"
+        name="email"
+        value={userData.email || ""}
+        onChange={handleChange}
+        ref={emailRef}
+        className="w-full p-2 border rounded mt-2"
+      />
+    </label>
 
-        <button
-          onClick={handleUpdate}
-          className="w-full bg-blue-500 text-white p-2 rounded mt-4"
-        >
-          Atualizar Dados
-        </button>
-      </div>
+    {/* Botão de atualizar dados */}
+    <button
+      onClick={handleUpdate}
+      className="w-full bg-blue-500 text-white p-2 rounded mt-2"
+    >
+      Atualizar Dados
+    </button>
+  </div>
+
+  {/* Coluna 2 - Senhas */}
+  <div className="w-full md:w-1/2">
+    <label className="block mb-4">
+      Senha Antiga:
+      <input
+        type="password"
+        name="oldPassword"
+        ref={oldPasswordRef}
+        className="w-full p-2 border rounded mt-2"
+      />
+    </label>
+
+    <label className="block mb-4">
+      Nova Senha:
+      <input
+        type="password"
+        name="newPassword"
+        ref={newPasswordRef}
+        className="w-full p-2 border rounded mt-2"
+      />
+    </label>
+
+    <label className="block mb-4">
+      Confirme sua nova senha:
+      <input
+        type="password"
+        name="newPassword"
+        ref={newPasswordRef1}
+        className="w-full p-2 border rounded mt-2"
+      />
+    </label>
+
+    {/* Botão de atualizar senha */}
+    <button
+      onClick={handleUpdatePassword}
+      className="w-full bg-green-600 text-white p-2 rounded mt-2"
+    >
+      Atualizar Senha
+    </button>
+  </div>
+</div>
+
 
       {/* Legal and marketing options - outside the form */}
       <div className="flex flex-col gap-2 mb-4 mt-4 bg-white p-4 rounded-md max-w-md w-full">

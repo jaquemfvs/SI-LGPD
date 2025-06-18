@@ -26,7 +26,7 @@ export default function Home() {
 
       }
     } catch (error) {
-      console.error("Login error:", error);
+        alert("Credenciais inválidas");
     }
   };
 
