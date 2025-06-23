@@ -7,12 +7,7 @@ class requestHandler {
     const {
       name,
       email,
-      password,
-      agreedToPromotionalEmails,
-      termsOfUseVersionAccepted,
-      privacyPolicyVersionAccepted,
-      termsOfUseLastUpdatedAt,
-      privacyPolicyLastUpdatedAt,
+      password
     } = req.body;
 
     if (!email || !password || !name) {
@@ -25,16 +20,11 @@ class requestHandler {
       name,
       email,
       password: await service.getHashed(password),
-      agreedToPromotionalEmails,
-      termsOfUseVersionAccepted,
-      privacyPolicyVersionAccepted,
-      termsOfUseLastUpdatedAt,
-      privacyPolicyLastUpdatedAt,
     };
 
     User.create(user)
-      .then(() => {
-        res.status(201).send();
+      .then((createdUser) => {
+        res.status(201).json({ userId: createdUser.id }); // Return the userId after successful creation
       })
       .catch((err) => {
         console.log(err);
@@ -99,31 +89,6 @@ class requestHandler {
       .anonymizeUserInSQL(user.id)
       .then(() => {
         res.status(200).send();
-      })
-      .catch((err) => {
-        console.log(err);
-        res.status(500).send();
-      });
-  };
-  updatePromotionalEmailPreference = (req, res) => {
-    let { user, query } = req;
-    const updatedAt = query.updatedAt || new Date().toISOString();
-
-    User.findOne({ where: { id: user.id } })
-      .then((user) => {
-        if (!user) return res.status(404).send();
-        user
-          .update({
-            agreedToPromotionalEmails: query.permit,
-            promotionalEmailsLastUpdatedAt: updatedAt,
-          })
-          .then(() => {
-            res.status(200).send();
-          })
-          .catch((err) => {
-            console.log(err);
-            res.status(400).send();
-          });
       })
       .catch((err) => {
         console.log(err);
