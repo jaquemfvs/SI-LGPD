@@ -27,35 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: true,
     },
-    agreedToPromotionalEmails: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
     subscribedToNewsletter: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-    },
-    privacyPolicyLastUpdatedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    termsOfUseLastUpdatedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    promotionalEmailsLastUpdatedAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    privacyPolicyVersionAccepted: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    termsOfUseVersionAccepted: {
-      type: DataTypes.STRING,
-      allowNull: true,
     },
   });
 

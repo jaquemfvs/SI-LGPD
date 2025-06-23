@@ -12,6 +12,7 @@ app.use(express.json());
 app.use('/user', require('./routes/user.routes'));
 app.use('/email', require('./routes/email.routes'));
 app.use('/security', require('./routes/security.routes'));
+app.use("/term", require("./routes/term.routes"));
 
 db.sequelize.sync().then(() => {
   app.listen(PORT, () =>
