@@ -89,21 +89,49 @@ class TermController {
     }
   }
 
-  async fetchLatestTerms(req, res) {
+  async fetchLatestVersionId(req, res) {
     try {
+      // Fetch the latest version based on the createdAt column
       const latestVersion = await Version.findOne({
-        order: [["version", "DESC"]],
+        order: [["createdAt", "DESC"]],
       });
 
       if (!latestVersion) {
         return res.status(404).json({ message: "No versions found." });
       }
 
-      const terms = await Term.findAll({ where: { versionId: latestVersion.id } });
-      res.status(200).json(terms);
+      // Return only the ID of the latest version
+      res.status(200).json({ versionId: latestVersion.id });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Error fetching latest terms." });
+      res.status(500).json({ message: "Error fetching latest version ID." });
+    }
+  }
+
+  async fetchTermsFromLatestVersion(req, res) {
+    try {
+      // Fetch the latest version based on the createdAt column
+      const latestVersion = await Version.findOne({
+        order: [["createdAt", "DESC"]],
+      });
+
+      if (!latestVersion) {
+        return res.status(404).json({ message: "No versions found." });
+      }
+
+      // Fetch all terms associated with the latest version ID
+      const terms = await Term.findAll({ where: { versionId: latestVersion.id } });
+
+      res.status(200).json({
+        version: {
+          id: latestVersion.id,
+          name: latestVersion.version,
+        },
+        terms,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error fetching terms from the latest version." });
     }
   }
 }
