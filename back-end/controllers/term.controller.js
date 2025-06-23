@@ -54,6 +54,28 @@ class TermController {
     }
   }
 
+  async createTermLog(req, res) {
+    const { termId, userId, action } = req.body;
+
+    if (!termId || !userId || !action) {
+      return res.status(400).json({ message: "Missing required fields." });
+    }
+
+    try {
+      const logEntry = await Log.create({
+        termId,
+        userId,
+        action,
+        timestamp: new Date(),
+      });
+
+      res.status(201).json({ message: "Log created successfully.", log: logEntry });
+    } catch (error) {
+      console.error("Error creating log entry:", error);
+      res.status(500).json({ message: "Internal server error." });
+    }
+  }
+
   async fetchTermsByVersionId(req, res) {
     const { versionId } = req.params;
 
@@ -132,6 +154,54 @@ class TermController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Error fetching terms from the latest version." });
+    }
+  }
+
+  async fetchUserLatestTermLogs(req, res) {
+    const { userId } = req.body; // Changed from req.params to req.body to match POST request
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    try {
+      // Fetch the latest version
+      const latestVersion = await Version.findOne({
+        order: [["createdAt", "DESC"]],
+      });
+
+      if (!latestVersion) {
+        return res.status(404).json({ message: "No versions found." });
+      }
+
+      // Fetch all terms associated with the latest version
+      const terms = await Term.findAll({ where: { versionId: latestVersion.id } });
+
+      // Fetch logs for the user and terms
+      const logs = await Log.findAll({
+        where: {
+          userId,
+          termId: terms.map((term) => term.id),
+        },
+        order: [["changeDate", "DESC"]],
+      });
+
+      // Map terms to their latest log or indicate no changes
+      const result = terms.map((term) => {
+        const log = logs.find((log) => log.termId === term.id);
+        return {
+          termId: term.id,
+          termName: term.name,
+          isOptional: term.optional,
+          lastModified: log ? log.changeDate : "No changes made",
+          status: log ? (log.signed ? "Signed" : "Declined") : "No action taken",
+        };
+      });
+
+      res.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error fetching user term logs." });
     }
   }
 }
