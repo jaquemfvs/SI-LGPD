@@ -39,7 +39,8 @@ class TermController {
   }
 
   async createLog(req, res) {
-    const { userId, changeDate, signed, termId } = req.body;
+    const { changeDate, signed, termId } = req.body;
+    const userId = req.user.id; // Obtém o ID do usuário autenticado
 
     if (!userId || !changeDate || signed === undefined || !termId) {
       return res.status(400).json({ message: "UserId, changeDate, signed, and termId are required." });
@@ -158,11 +159,7 @@ class TermController {
   }
 
   async fetchUserLatestTermLogs(req, res) {
-    const { userId } = req.query; // Changed to req.query to match GET request with URL parameters
-
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required." });
-    }
+    const userId = req.user.id; // Obtém o ID do usuário autenticado
 
     try {
       // Fetch the latest version
@@ -212,11 +209,7 @@ class TermController {
   }
 
   async hasUserSignedLatestTerms(req, res) {
-    const { userId } = req.query; // Expecting userId as a query parameter
-
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required." });
-    }
+    const userId = req.user.id; // Obtém o ID do usuário autenticado
 
     try {
       // Fetch the latest version

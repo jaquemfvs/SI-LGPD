@@ -67,26 +67,32 @@ export default function UserSettings() {
     }
   }, [router]);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/");
-    } else {
-      const fetchTermsAndVersion = async () => {
-        try {
-          const response = await axios.get(
-            `http://localhost:3200/term/user/latest-logs?userId=${userData.id}`
-          );
+  const fetchTermsAndVersion = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/");
+        return;
+      }
 
-          setVersion(response.data.version);
-          setTerms(response.data.terms);
-        } catch (error) {
-          console.error("Failed to fetch terms and version:", error);
+      const response = await axios.get(
+        `http://localhost:3200/term/user/latest-logs`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      };
+      );
 
-      fetchTermsAndVersion();
+      setVersion(response.data.version);
+      setTerms(response.data.terms);
+    } catch (error) {
+      console.error("Failed to fetch terms and version:", error);
     }
+  };
+
+  useEffect(() => {
+    fetchTermsAndVersion();
   }, [router, userData.id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -174,7 +180,6 @@ export default function UserSettings() {
       await axios.post(
         "http://localhost:3200/term/log",
         {
-          userId: userData.id,
           changeDate,
           signed: newSignedStatus,
           termId,
@@ -186,12 +191,7 @@ export default function UserSettings() {
         }
       );
 
-      const updatedTermsResponse = await axios.get(
-        `http://localhost:3200/term/user/latest-logs?userId=${userData.id}`
-      );
-
-      setTerms(updatedTermsResponse.data.terms);
-      setVersion(updatedTermsResponse.data.version);
+      await fetchTermsAndVersion();
 
       alert("Termo opcional atualizado com sucesso!");
     } catch (error) {
@@ -220,7 +220,6 @@ export default function UserSettings() {
       await axios.post(
         "http://localhost:3200/term/log",
         {
-          userId: userData.id,
           changeDate,
           signed: true,
           termId,
@@ -232,12 +231,7 @@ export default function UserSettings() {
         }
       );
 
-      const updatedTermsResponse = await axios.get(
-        `http://localhost:3200/term/user/latest-logs?userId=${userData.id}`
-      );
-
-      setTerms(updatedTermsResponse.data.terms);
-      setVersion(updatedTermsResponse.data.version);
+      await fetchTermsAndVersion();
 
       alert("Termo obrigatório aceito com sucesso!");
     } catch (error) {

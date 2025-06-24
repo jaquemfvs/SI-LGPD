@@ -1,13 +1,14 @@
 const controller = require("../controllers/term.controller.js");
+const authMiddleware = require("../middleware/auth.middleware"); // Importa o middleware
 const router = require("express").Router();
 
-router.post("/version", controller.createVersion);
-router.post("/term", controller.createTerm);
-router.post("/log", controller.createLog);
-router.get("/latest-term", controller.fetchTermsFromLatestVersion);
-router.get("/user/latest-logs", controller.fetchUserLatestTermLogs);
-router.get("/user/has-signed-latest", controller.hasUserSignedLatestTerms);
-router.get("/version/:versionId", controller.fetchTermsByVersionId);
-router.get("/:id", controller.fetchTermById);
+router.post("/version", controller.createVersion); //admin
+router.post("/term", controller.createTerm); //admin
+router.post("/log", authMiddleware, controller.createLog); //user
+router.get("/latest-term", controller.fetchTermsFromLatestVersion); //public
+router.get("/user/latest-logs", authMiddleware, controller.fetchUserLatestTermLogs); //user
+router.get("/user/has-signed-latest", authMiddleware, controller.hasUserSignedLatestTerms); //user
+router.get("/version/:versionId", controller.fetchTermsByVersionId); //public
+router.get("/:id", controller.fetchTermById); //public
 
 module.exports = router;

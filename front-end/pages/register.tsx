@@ -10,8 +10,6 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordsMatch, setPasswordsMatch] = useState(true);
-  const [agreedToPromotionalEmails, setagreedToPromotionalEmails] =
-    useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [latestTerms, setLatestTerms] = useState<any[]>([]);
   const [acceptedTerms, setAcceptedTerms] = useState<{ [key: string]: boolean }>(
@@ -36,27 +34,38 @@ export default function Register() {
         name,
         email,
         password,
-        agreedToPromotionalEmails,
       });
 
-      const userId = response.data.userId;
+      const loginResponse = await axios.post("http://localhost:3200/user/login", {
+        email,
+        password,
+      });
 
-      if (!userId) {
-        throw new Error("User ID not returned from registration.");
+      const token = loginResponse.data.token;
+
+      if (!token) {
+        throw new Error("Token not returned from login.");
       }
 
       await Promise.all(
         acceptedTermsLog.map((log) =>
-          axios.post("http://localhost:3200/term/log", {
-            userId,
-            changeDate: log.acceptedAt,
-            signed: true,
-            termId: log.termId,
-          })
+          axios.post(
+            "http://localhost:3200/term/log",
+            {
+              changeDate: log.acceptedAt,
+              signed: true,
+              termId: log.termId,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
         )
       );
 
-      alert("Conta criada com sucesso!");
+      alert("Operações realizadas com sucesso.");
       router.push("/");
     } catch (error) {
       console.error("Error during registration or logging terms:", error);
