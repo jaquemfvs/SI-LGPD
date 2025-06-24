@@ -224,24 +224,26 @@ export default function Register() {
               {latestVersionName && (
                 <p className="text-sm text-gray-400">Versão: {latestVersionName}</p>
               )}
-              {latestTerms.map((term) => (
-                <div key={term.id} className="flex flex-row gap-5">
-                  <input
-                    type="checkbox"
-                    id={`term_${term.id}`}
-                    checked={acceptedTerms[term.id] || false}
-                    onChange={() => handleTermChange(term.id)}
-                    className="ml-2"
-                  />
-                  <label
-                    htmlFor={`term_${term.id}`}
-                    className="cursor-pointer text-blue-300 underline hover:text-blue-600"
-                    onClick={() => handleTermClick(term)}
-                  >
-                    {term.name} {term.optional ? "(Opcional)" : "(Obrigatório)"}
-                  </label>
-                </div>
-              ))}
+              <div className="overflow-y-auto pr-4" style={{ maxHeight: '200px' }}>
+                {latestTerms.map((term) => (
+                  <div key={term.id} className="flex flex-row gap-5 mb-2">
+                    <input
+                      type="checkbox"
+                      id={`term_${term.id}`}
+                      checked={acceptedTerms[term.id] || false}
+                      onChange={() => handleTermChange(term.id)}
+                      className="ml-2"
+                    />
+                    <label
+                      htmlFor={`term_${term.id}`}
+                      className="cursor-pointer text-blue-300 underline hover:text-blue-600"
+                      onClick={() => handleTermClick(term)}
+                    >
+                      {term.name} {term.optional ? "(Opcional)" : "(Obrigatório)"}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {!areMandatoryTermsAccepted && (

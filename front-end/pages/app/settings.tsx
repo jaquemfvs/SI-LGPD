@@ -18,6 +18,7 @@ interface Term {
   isOptional: boolean;
   lastModified: string;
   status: string;
+  description?: string; // Added optional description field
 }
 
 export default function UserSettings() {
@@ -35,6 +36,8 @@ export default function UserSettings() {
     id: 0,
     name: "",
   });
+
+  const [selectedTerm, setSelectedTerm] = useState<Term | null>(null); // State to track the selected term
 
   const emailRef = createRef<HTMLInputElement>();
   const nameRef = createRef<HTMLInputElement>();
@@ -249,8 +252,38 @@ export default function UserSettings() {
     router.push("/");
   };
 
+  const handleTermClick = async (term: Term) => {
+    try {
+      const response = await axios.get(`http://localhost:3200/term/${term.termId}`);
+      setSelectedTerm({ ...term, description: response.data.description });
+    } catch (error) {
+      console.error("Erro ao buscar descrição do termo:", error);
+      alert("Não foi possível carregar a descrição do termo.");
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedTerm(null); // Close the modal by clearing the selected term
+  };
+
   return (
     <main className="w-full h-full bg-gray-900 flex flex-col items-center p-6 relative">
+      {/* Modal for term description */}
+      {selectedTerm && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-md shadow-md w-1/2">
+            <h2 className="text-xl font-bold mb-4">{selectedTerm.termName}</h2>
+            <p className="mb-4">{selectedTerm.description || "Sem descrição disponível."}</p>
+            <button
+              onClick={closeModal}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Botão para voltar ao menu inicial */}
       <button
         onClick={() => router.push("/app")}
@@ -349,9 +382,11 @@ export default function UserSettings() {
             {terms.map((term) => (
               <li key={term.termId} className="mb-4">
                 <div className="flex justify-between items-center gap-4">
-                  <span className="flex-1">
-                    <strong>{term.termName}</strong> -{" "}
-                    {term.isOptional ? "Opcional" : "Obrigatório"}
+                  <span
+                    className="flex-1 cursor-pointer text-blue-300 underline hover:text-blue-600"
+                    onClick={() => handleTermClick(term)}
+                  >
+                    <strong>{term.termName}</strong> - {term.isOptional ? "Opcional" : "Obrigatório"}
                   </span>
                   {term.isOptional ? (
                     <input
@@ -372,8 +407,7 @@ export default function UserSettings() {
                   )}
                 </div>
                 <p className="text-sm text-gray-600">
-                  Última modificação: {" "}
-                  {term.lastModified === "No changes made"
+                  Última modificação: {term.lastModified === "No changes made"
                     ? "Nenhuma alteração"
                     : new Date(term.lastModified).toLocaleString()}
                 </p>

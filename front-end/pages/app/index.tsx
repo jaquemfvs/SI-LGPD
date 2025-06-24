@@ -16,6 +16,7 @@ interface UserData {
 export default function Newsletter() {
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null); // State to store user data
+  const [hasAcceptedLatestTerms, setHasAcceptedLatestTerms] = useState(true); // State to track if user accepted latest terms
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -39,6 +40,36 @@ export default function Newsletter() {
       fetchUserData();
     }
   }, [router]);
+
+  useEffect(() => {
+    const checkLatestTerms = async () => {
+      const token = localStorage.getItem("token");
+      if (!token || !userData?.id) {
+        setHasAcceptedLatestTerms(false); // Assume false if no token or userId
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          "http://localhost:3200/term/user/has-signed-latest",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            params: {
+              userId: userData.id, // Ensure userId is passed correctly
+            },
+          }
+        );
+        setHasAcceptedLatestTerms(response.data.allMandatoryTermsSigned);
+      } catch (error) {
+        console.error("Error checking latest terms acceptance:", error);
+        setHasAcceptedLatestTerms(false); // Assume false if there's an error
+      }
+    };
+
+    checkLatestTerms();
+  }, [userData?.id]); // Add userData.id as a dependency
 
   const handleSettings = () => {
     router.push("/app/settings"); // Redireciona para a página de configurações
@@ -72,6 +103,13 @@ export default function Newsletter() {
 
   return (
     <main className="w-full h-full bg-gray-900 flex flex-col items-center p-6 relative">
+      {!hasAcceptedLatestTerms && (
+        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-red-500 text-white p-4 rounded-md shadow-md">
+          Você precisa aceitar os termos mais recentes para continuar usando o
+          sistema.
+        </div>
+      )}
+
       {/* Botão de Subscribe no canto superior esquerdo */}
       <button
         onClick={handleSubscribe}

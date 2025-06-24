@@ -210,6 +210,52 @@ class TermController {
       res.status(500).json({ message: "Error fetching user term logs." });
     }
   }
+
+  async hasUserSignedLatestTerms(req, res) {
+    const { userId } = req.query; // Expecting userId as a query parameter
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    try {
+      // Fetch the latest version
+      const latestVersion = await Version.findOne({
+        order: [["createdAt", "DESC"]],
+      });
+
+      if (!latestVersion) {
+        return res.status(404).json({ message: "No versions found." });
+      }
+
+      // Fetch all terms associated with the latest version
+      const terms = await Term.findAll({ where: { versionId: latestVersion.id } });
+
+      // Fetch logs for the user and terms
+      const logs = await Log.findAll({
+        where: {
+          userId,
+          termId: terms.map((term) => term.id),
+          signed: true, // Only consider signed terms
+        },
+      });
+
+      // Check if all mandatory terms are signed
+      const mandatoryTerms = terms.filter((term) => !term.optional);
+      const signedMandatoryTerms = logs.map((log) => log.termId);
+
+      const allMandatoryTermsSigned = mandatoryTerms.every((term) =>
+        signedMandatoryTerms.includes(term.id)
+      );
+
+      res.status(200).json({
+        allMandatoryTermsSigned,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error checking if user signed latest terms." });
+    }
+  }
 }
 
 module.exports = new TermController();
