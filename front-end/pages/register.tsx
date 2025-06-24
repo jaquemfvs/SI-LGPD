@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import TermsModal from "../components/TermsModal";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { HiArrowNarrowLeft } from "react-icons/hi";
@@ -13,27 +12,24 @@ export default function Register() {
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [agreedToPromotionalEmails, setagreedToPromotionalEmails] =
     useState(false);
-  const [termsCondAccepted, setTermsCondAccepted] = useState(false);
-  const [privacyPolicySpecificAccepted, setPrivacyPolicySpecificAccepted] =
-    useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
-  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
-  const [modalFocus, setModalFocus] = useState<"terms" | "privacy" | null>(
-    null
+  const [latestTerms, setLatestTerms] = useState<any[]>([]);
+  const [acceptedTerms, setAcceptedTerms] = useState<{ [key: string]: boolean }>(
+    {}
   );
-  const [termsOfUseVersionAccepted, setTermsOfUseVersionAccepted] =
-    useState("1.0");
-  const [privacyPolicyVersionAccepted, setPrivacyPolicyVersionAccepted] =
-    useState("1.0");
-  const [termsOfUseLastUpdatedAt, setTermsOfUseLastUpdatedAt] =
-    useState<Date | null>(null);
-  const [privacyPolicyLastUpdatedAt, setPrivacyPolicyLastUpdatedAt] =
-    useState<Date | null>(null);
+  const [selectedTerm, setSelectedTerm] = useState<{ name: string; description: string } | null>(null);
+  const [latestVersionName, setLatestVersionName] = useState<string>("");
+  const [acceptedTermsLog, setAcceptedTermsLog] = useState<{ termId: string; acceptedAt: Date }[]>([]);
 
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!areMandatoryTermsAccepted) {
+      alert("Você deve aceitar todos os termos obrigatórios para continuar.");
+      return;
+    }
 
     try {
       const response = await axios.post("http://localhost:3200/user/register", {
@@ -41,15 +37,30 @@ export default function Register() {
         email,
         password,
         agreedToPromotionalEmails,
-        termsOfUseVersionAccepted,
-        privacyPolicyVersionAccepted,
-        termsOfUseLastUpdatedAt,
-        privacyPolicyLastUpdatedAt,
       });
+
+      const userId = response.data.userId;
+
+      if (!userId) {
+        throw new Error("User ID not returned from registration.");
+      }
+
+      await Promise.all(
+        acceptedTermsLog.map((log) =>
+          axios.post("http://localhost:3200/term/log", {
+            userId,
+            changeDate: log.acceptedAt,
+            signed: true,
+            termId: log.termId,
+          })
+        )
+      );
+
       alert("Conta criada com sucesso!");
       router.push("/");
     } catch (error) {
-      alert("Não foi possível registrar!");
+      console.error("Error during registration or logging terms:", error);
+      alert("Não foi possível registrar ou salvar os logs dos termos!");
     }
   };
 
@@ -70,48 +81,62 @@ export default function Register() {
     setIsEmailValid(emailRegex.test(email));
   }, [email]);
 
-  // Renamed handler for Terms and Conditions checkbox change
-  const handleTermsCondChange = () => {
-    if (!termsCondAccepted) {
-      setModalFocus("terms");
-      setIsPolicyModalOpen(true);
-    } else {
-      setTermsCondAccepted(false);
+  useEffect(() => {
+    const fetchLatestTerms = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3200/term/latest-term"
+        );
+        const { version, terms } = response.data;
+        setLatestVersionName(version.name);
+        setLatestTerms(terms);
+
+        const initialAcceptedTerms: { [key: string]: boolean } = {};
+        terms.forEach((term: { id: string }) => {
+          initialAcceptedTerms[term.id] = false;
+        });
+        setAcceptedTerms(initialAcceptedTerms);
+      } catch (error) {
+        console.error("Error fetching latest terms:", error);
+      }
+    };
+
+    fetchLatestTerms();
+  }, []);
+
+  const handleTermChange = (termId: string) => {
+    if (!selectedTerm) {
+      setAcceptedTerms((prev) => {
+        const isAccepted = !prev[termId];
+
+        if (isAccepted) {
+          setAcceptedTermsLog((log) => [
+            ...log,
+            { termId, acceptedAt: new Date() },
+          ]);
+        } else {
+          setAcceptedTermsLog((log) => log.filter((entry) => entry.termId !== termId));
+        }
+
+        return {
+          ...prev,
+          [termId]: isAccepted,
+        };
+      });
     }
   };
 
-  // New handler for Privacy Policy specific checkbox change
-  const handlePrivacyPolicySpecificChange = () => {
-    if (!privacyPolicySpecificAccepted) {
-      setModalFocus("privacy");
-      setIsPolicyModalOpen(true);
-    } else {
-      setPrivacyPolicySpecificAccepted(false);
-    }
+  const handleTermClick = (term: { name: string; description: string }) => {
+    setSelectedTerm(term);
   };
 
-  // Renamed and updated modal accept handler
-  const handleModalAccept = () => {
-    const currentTime = new Date();
-    if (modalFocus === "terms") {
-      setTermsCondAccepted(true);
-      setTermsOfUseLastUpdatedAt(currentTime);
-    } else if (modalFocus === "privacy") {
-      setPrivacyPolicySpecificAccepted(true);
-      setPrivacyPolicyLastUpdatedAt(currentTime);
-    }
-    setIsPolicyModalOpen(false);
+  const closeModal = () => {
+    setSelectedTerm(null);
   };
 
-  // Renamed and updated modal decline handler
-  const handleModalDecline = () => {
-    if (modalFocus === "terms") {
-      setTermsCondAccepted(false);
-    } else if (modalFocus === "privacy") {
-      setPrivacyPolicySpecificAccepted(false);
-    }
-    setIsPolicyModalOpen(false);
-  };
+  const areMandatoryTermsAccepted = latestTerms.every(
+    (term) => term.optional || acceptedTerms[term.id]
+  );
 
   return (
     <main className="w-full bg-gray-900 h-full flex">
@@ -190,88 +215,42 @@ export default function Register() {
               </div>
             </div>
             <div className="flex flex-col gap-5 content-start start-1 text-white wrap-normal">
-              <div className="flex flex-row gap-5">
-                <input
-                  type="checkbox"
-                  id="offers"
-                  checked={agreedToPromotionalEmails}
-                  onChange={() =>
-                    setagreedToPromotionalEmails(!agreedToPromotionalEmails)
-                  }
-                  className="ml-2"
-                />
-                <label htmlFor="offers">
-                  Concordo em receber e-mails com novidades e ofertas.
-                </label>
-              </div>
-
-              <div className="flex flex-row gap-5">
-                <input
-                  type="checkbox"
-                  id="terms_conditions" // Changed id for clarity
-                  checked={termsCondAccepted}
-                  onChange={handleTermsCondChange} // Updated handler
-                  className="ml-2"
-                />
-                <label htmlFor="terms_conditions" className="cursor-pointer">
-                  {" "}
-                  {/* Changed htmlFor for clarity */}
-                  Li e aceito os&nbsp;
-                  <span
-                    onClick={() => {
-                      setModalFocus("terms");
-                      setIsPolicyModalOpen(true);
-                    }} // Updated to set focus and open modal
-                    className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
-                  >
-                    Termos e Condições de Uso
-                  </span>
-                </label>
-              </div>
-              {/* New Checkbox for Privacy Policy */}
-              <div className="flex flex-row gap-5">
-                <input
-                  type="checkbox"
-                  id="privacy_policy_specific"
-                  checked={privacyPolicySpecificAccepted}
-                  onChange={handlePrivacyPolicySpecificChange}
-                  className="ml-2"
-                />
-                <label
-                  htmlFor="privacy_policy_specific"
-                  className="cursor-pointer"
-                >
-                  Li e aceito a&nbsp;
-                  <span
-                    onClick={() => {
-                      setModalFocus("privacy");
-                      setIsPolicyModalOpen(true);
-                    }}
-                    className="text-blue-300 underline hover:text-blue-600 cursor-pointer"
-                  >
-                    Política de Privacidade
-                  </span>
-                </label>
+              <h2 className="text-white text-2xl">Termos e Condições</h2>
+              {latestVersionName && (
+                <p className="text-sm text-gray-400">Versão: {latestVersionName}</p>
+              )}
+              <div className="overflow-y-auto pr-4" style={{ maxHeight: '200px' }}>
+                {latestTerms.map((term) => (
+                  <div key={term.id} className="flex flex-row gap-5 mb-2">
+                    <input
+                      type="checkbox"
+                      id={`term_${term.id}`}
+                      checked={acceptedTerms[term.id] || false}
+                      onChange={() => handleTermChange(term.id)}
+                      className="ml-2"
+                    />
+                    <label
+                      htmlFor={`term_${term.id}`}
+                      className="cursor-pointer text-blue-300 underline hover:text-blue-600"
+                      onClick={() => handleTermClick(term)}
+                    >
+                      {term.name} {term.optional ? "(Opcional)" : "(Obrigatório)"}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
-            {/* Updated error message for Terms and Conditions */}
-            {!termsCondAccepted && (
+
+            {!areMandatoryTermsAccepted && (
               <div className="text-red-500 text-sm">
-                Você deve aceitar os Termos e Condições de Uso para continuar.
+                Você deve aceitar todos os termos obrigatórios para continuar.
               </div>
             )}
-            {/* New error message for Privacy Policy */}
-            {!privacyPolicySpecificAccepted && (
-              <div className="text-red-500 text-sm">
-                Você deve aceitar a Política de Privacidade para continuar.
-              </div>
-            )}
+
             <div className="flex place-content-center">
               <button
                 disabled={
-                  // Updated disabled condition
-                  !termsCondAccepted ||
-                  !privacyPolicySpecificAccepted || // Added new condition
+                  !areMandatoryTermsAccepted ||
                   !name ||
                   !email ||
                   !password ||
@@ -281,8 +260,7 @@ export default function Register() {
                 }
                 type="submit"
                 className={`text-white flex justify-center items-center rounded-md h-14 w-fit min-w-[20rem] hover:cursor-pointer hover:scale-115 transition-all active:scale-90 ${
-                  !termsCondAccepted ||
-                  !privacyPolicySpecificAccepted || // Added new condition
+                  !areMandatoryTermsAccepted ||
                   !name ||
                   !email ||
                   !password ||
@@ -298,14 +276,22 @@ export default function Register() {
             </div>
           </div>
         </form>
+
+        {selectedTerm && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-md shadow-md w-1/2">
+              <h2 className="text-xl font-bold mb-4">{selectedTerm.name}</h2>
+              <p className="mb-4">{selectedTerm.description}</p>
+              <button
+                onClick={closeModal}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-      <TermsModal
-        isOpen={isPolicyModalOpen} // Updated prop
-        onClose={() => setIsPolicyModalOpen(false)} // Updated prop
-        onAccept={handleModalAccept} // Updated prop
-        onDecline={handleModalDecline} // Updated prop
-        modalFocus={modalFocus!} // Pass the modalFocus state
-      />
     </main>
   );
 }
