@@ -15,8 +15,8 @@ interface UserData {
 
 export default function Newsletter() {
   const router = useRouter();
-  const [userData, setUserData] = useState<UserData | null>(null); // State to store user data
-  const [hasAcceptedLatestTerms, setHasAcceptedLatestTerms] = useState(true); // State to track if user accepted latest terms
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [hasAcceptedLatestTerms, setHasAcceptedLatestTerms] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -45,7 +45,7 @@ export default function Newsletter() {
     const checkLatestTerms = async () => {
       const token = localStorage.getItem("token");
       if (!token || !userData?.id) {
-        setHasAcceptedLatestTerms(false); // Assume false if no token or userId
+        setHasAcceptedLatestTerms(false);
         return;
       }
 
@@ -57,19 +57,19 @@ export default function Newsletter() {
               Authorization: `Bearer ${token}`,
             },
             params: {
-              userId: userData.id, // Ensure userId is passed correctly
+              userId: userData.id,
             },
           }
         );
         setHasAcceptedLatestTerms(response.data.allMandatoryTermsSigned);
       } catch (error) {
         console.error("Error checking latest terms acceptance:", error);
-        setHasAcceptedLatestTerms(false); // Assume false if there's an error
+        setHasAcceptedLatestTerms(false);
       }
     };
 
     checkLatestTerms();
-  }, [userData?.id]); // Add userData.id as a dependency
+  }, [userData?.id]);
 
   const handleSettings = () => {
     router.push("/app/settings"); // Redireciona para a página de configurações

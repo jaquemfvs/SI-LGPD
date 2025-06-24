@@ -32,7 +32,6 @@ export default function Register() {
     }
 
     try {
-      // Register the user and ensure the userId is returned
       const response = await axios.post("http://localhost:3200/user/register", {
         name,
         email,
@@ -40,13 +39,12 @@ export default function Register() {
         agreedToPromotionalEmails,
       });
 
-      const userId = response.data.userId; // Ensure userId is returned in the response
+      const userId = response.data.userId;
 
       if (!userId) {
         throw new Error("User ID not returned from registration.");
       }
 
-      // Log the accepted terms after successful registration
       await Promise.all(
         acceptedTermsLog.map((log) =>
           axios.post("http://localhost:3200/term/log", {
@@ -93,7 +91,6 @@ export default function Register() {
         setLatestVersionName(version.name);
         setLatestTerms(terms);
 
-        // Initialize acceptedTerms state with all terms unchecked
         const initialAcceptedTerms: { [key: string]: boolean } = {};
         terms.forEach((term: { id: string }) => {
           initialAcceptedTerms[term.id] = false;
@@ -108,12 +105,10 @@ export default function Register() {
   }, []);
 
   const handleTermChange = (termId: string) => {
-    // Only allow toggling the checkbox if the modal is not open
     if (!selectedTerm) {
       setAcceptedTerms((prev) => {
         const isAccepted = !prev[termId];
 
-        // Update the log with the acceptance timestamp
         if (isAccepted) {
           setAcceptedTermsLog((log) => [
             ...log,
@@ -255,7 +250,6 @@ export default function Register() {
             <div className="flex place-content-center">
               <button
                 disabled={
-                  // Ensure mandatory terms are accepted
                   !areMandatoryTermsAccepted ||
                   !name ||
                   !email ||

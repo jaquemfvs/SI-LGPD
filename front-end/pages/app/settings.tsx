@@ -1,7 +1,7 @@
 import "@/app/globals.css";
 import { createRef, useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { FaUserCircle } from "react-icons/fa"; // Ícone de usuário
+import { FaUserCircle } from "react-icons/fa";
 import axios from "axios";
 import ViewOnlyModal from "../../components/ViewOnlyModal";
 
@@ -18,7 +18,7 @@ interface Term {
   isOptional: boolean;
   lastModified: string;
   status: string;
-  description?: string; // Added optional description field
+  description?: string;
 }
 
 export default function UserSettings() {
@@ -37,7 +37,7 @@ export default function UserSettings() {
     name: "",
   });
 
-  const [selectedTerm, setSelectedTerm] = useState<Term | null>(null); // State to track the selected term
+  const [selectedTerm, setSelectedTerm] = useState<Term | null>(null);
 
   const emailRef = createRef<HTMLInputElement>();
   const nameRef = createRef<HTMLInputElement>();
@@ -263,12 +263,11 @@ export default function UserSettings() {
   };
 
   const closeModal = () => {
-    setSelectedTerm(null); // Close the modal by clearing the selected term
+    setSelectedTerm(null);
   };
 
   return (
     <main className="w-full h-full bg-gray-900 flex flex-col items-center p-6 relative">
-      {/* Modal for term description */}
       {selectedTerm && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-md shadow-md w-1/2">
