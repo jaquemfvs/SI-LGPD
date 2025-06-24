@@ -10,12 +10,14 @@ interface UserData {
   email: string;
   name?: string;
   subscribedToNewsletter?: boolean;
-  agreedToPromotionalEmails?: boolean;
-  termsOfUseVersionAccepted?: string;
-  termsOfUseLastUpdatedAt?: string;
-  privacyPolicyVersionAccepted?: string;
-  privacyPolicyLastUpdatedAt?: string;
-  promotionalEmailsLastUpdatedAt?: string;
+}
+
+interface Term {
+  termId: number;
+  termName: string;
+  isOptional: boolean;
+  lastModified: string;
+  status: string;
 }
 
 export default function UserSettings() {
@@ -26,16 +28,14 @@ export default function UserSettings() {
     email: "",
     name: "",
     subscribedToNewsletter: false,
-    agreedToPromotionalEmails: false,
-    termsOfUseVersionAccepted: "",
-    termsOfUseLastUpdatedAt: "",
-    privacyPolicyVersionAccepted: "",
-    privacyPolicyLastUpdatedAt: "",
-    promotionalEmailsLastUpdatedAt: "",
   });
 
-  const [isViewOnlyModalOpen, setIsViewOnlyModalOpen] = useState(false);
-  const [viewOnlyModalFocus, setViewOnlyModalFocus] = useState<"terms" | "privacy" | null>(null);
+  const [terms, setTerms] = useState<Term[]>([]);
+  const [version, setVersion] = useState<{ id: number; name: string }>({
+    id: 0,
+    name: "",
+  });
+
   const emailRef = createRef<HTMLInputElement>();
   const nameRef = createRef<HTMLInputElement>();
   const oldPasswordRef = createRef<HTMLInputElement>();
@@ -63,6 +63,28 @@ export default function UserSettings() {
       fetchUserData();
     }
   }, [router]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/");
+    } else {
+      const fetchTermsAndVersion = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:3200/term/user/latest-logs?userId=${userData.id}`
+          );
+
+          setVersion(response.data.version);
+          setTerms(response.data.terms);
+        } catch (error) {
+          console.error("Failed to fetch terms and version:", error);
+        }
+      };
+
+      fetchTermsAndVersion();
+    }
+  }, [router, userData.id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({
@@ -128,19 +150,32 @@ export default function UserSettings() {
   }
 };
 
-
-  const handlePromotionalEmailsToggle = async () => {
+  const handleOptionalTermChange = async (termId: number) => {
     const token = localStorage.getItem("token");
+
     if (!token) {
-      alert("Você precisa estar logado.");
+      alert("Token de autenticação ausente. Faça login novamente.");
       return;
     }
+
     try {
-      const newValue = !userData.agreedToPromotionalEmails;
-      const currentTime = new Date();
-      await axios.put(
-        `http://localhost:3200/user/promotionalEmails?permit=${newValue}&updatedAt=${currentTime.toISOString()}`,
-        {},
+      const termToUpdate = terms.find((term) => term.termId === termId);
+      if (!termToUpdate) {
+        alert("Termo não encontrado.");
+        return;
+      }
+
+      const newSignedStatus = termToUpdate.status === "Signed" ? false : true;
+      const changeDate = new Date().toISOString();
+
+      await axios.post(
+        "http://localhost:3200/term/log",
+        {
+          userId: userData.id,
+          changeDate,
+          signed: newSignedStatus,
+          termId,
+        },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -148,15 +183,63 @@ export default function UserSettings() {
         }
       );
 
-      // Fetch updated user data
-      const response = await axios.get("http://localhost:3200/user/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUserData(response.data);
+      const updatedTermsResponse = await axios.get(
+        `http://localhost:3200/term/user/latest-logs?userId=${userData.id}`
+      );
+
+      setTerms(updatedTermsResponse.data.terms);
+      setVersion(updatedTermsResponse.data.version);
+
+      alert("Termo opcional atualizado com sucesso!");
     } catch (error) {
-      alert("Erro ao atualizar preferência de e-mails promocionais.");
+      console.error("Erro ao modificar termo opcional:", error);
+      alert("Erro ao modificar termo. Tente novamente.");
+    }
+  };
+
+  const handleMandatoryTermAccept = async (termId: number) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Token de autenticação ausente. Faça login novamente.");
+      return;
+    }
+
+    const confirmAccept = confirm(
+      "Você tem certeza que deseja aceitar este termo obrigatório? Esta ação não poderá ser desfeita."
+    );
+
+    if (!confirmAccept) return;
+
+    try {
+      const changeDate = new Date().toISOString();
+
+      await axios.post(
+        "http://localhost:3200/term/log",
+        {
+          userId: userData.id,
+          changeDate,
+          signed: true,
+          termId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const updatedTermsResponse = await axios.get(
+        `http://localhost:3200/term/user/latest-logs?userId=${userData.id}`
+      );
+
+      setTerms(updatedTermsResponse.data.terms);
+      setVersion(updatedTermsResponse.data.version);
+
+      alert("Termo obrigatório aceito com sucesso!");
+    } catch (error) {
+      console.error("Erro ao aceitar termo obrigatório:", error);
+      alert("Erro ao aceitar termo. Tente novamente.");
     }
   };
 
@@ -164,15 +247,6 @@ export default function UserSettings() {
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     localStorage.removeItem("userData");
     router.push("/");
-  };
-
-  const openViewOnlyModal = (focus: "terms" | "privacy") => {
-    setViewOnlyModalFocus(focus);
-    setIsViewOnlyModalOpen(true);
-  };
-
-  const closeViewOnlyModal = () => {
-    setIsViewOnlyModalOpen(false);
   };
 
   return (
@@ -267,82 +341,46 @@ export default function UserSettings() {
     </button>
   </div>
 </div>
-
-
-      {/* Legal and marketing options - outside the form */}
       <div className="flex flex-col gap-2 mb-4 mt-4 bg-white p-4 rounded-md max-w-md w-full">
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="promotionalEmails"
-            checked={!!userData.agreedToPromotionalEmails}
-            onChange={handlePromotionalEmailsToggle}
-            className="mr-2"
-          />
-          <label htmlFor="promotionalEmails">
-            Receber e-mails promocionais
-          </label>
+        <div className="overflow-y-auto pr-4" style={{ maxHeight: '200px' }}>
+          <h2 className="text-xl font-bold mb-1">Termos de Uso</h2>
+          <p className="text-sm text-gray-500 mb-4">Versão: {version.name}</p>
+          <ul className="list-disc pl-5">
+            {terms.map((term) => (
+              <li key={term.termId} className="mb-4">
+                <div className="flex justify-between items-center gap-4">
+                  <span className="flex-1">
+                    <strong>{term.termName}</strong> -{" "}
+                    {term.isOptional ? "Opcional" : "Obrigatório"}
+                  </span>
+                  {term.isOptional ? (
+                    <input
+                      type="checkbox"
+                      checked={term.status === "Signed"}
+                      onChange={() => handleOptionalTermChange(term.termId)}
+                      className="ml-2"
+                    />
+                  ) : term.status === "Signed" ? (
+                    <span>✔</span>
+                  ) : (
+                    <button
+                      onClick={() => handleMandatoryTermAccept(term.termId)}
+                      className="ml-2 bg-blue-500 text-white px-2 py-1 rounded"
+                    >
+                      Aceitar
+                    </button>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600">
+                  Última modificação: {" "}
+                  {term.lastModified === "No changes made"
+                    ? "Nenhuma alteração"
+                    : new Date(term.lastModified).toLocaleString()}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="flex flex-col">
-          <span>
-            Termos de Uso:
-            <span
-              className="text-blue-500 underline cursor-pointer"
-              onClick={() => openViewOnlyModal("terms")}
-            >
-              {userData.termsOfUseVersionAccepted
-                ? ` Versão ${userData.termsOfUseVersionAccepted}`
-                : " Não aceito"}
-            </span>
-          </span>
-          <span className="text-gray-600">
-            {userData.termsOfUseLastUpdatedAt
-              ? `Termo aceitado em: ${new Date(
-                  userData.termsOfUseLastUpdatedAt
-                ).toLocaleString()}`
-              : "Termo recusado em: Não disponível"}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <span>
-            Política de Privacidade:
-            <span
-              className="text-blue-500 underline cursor-pointer"
-              onClick={() => openViewOnlyModal("privacy")}
-            >
-              {userData.privacyPolicyVersionAccepted
-                ? ` Versão ${userData.privacyPolicyVersionAccepted}`
-                : " Não aceito"}
-            </span>
-          </span>
-          <span className="text-gray-600">
-            {userData.privacyPolicyLastUpdatedAt
-              ? `Termo aceitado em: ${new Date(
-                  userData.privacyPolicyLastUpdatedAt
-                ).toLocaleString()}`
-              : "Termo recusado em: Não disponível"}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <span>
-            E-mails Promocionais:
-            <span className="text-gray-600">
-              {userData.agreedToPromotionalEmails ? " Aceito" : " Não aceito"}
-            </span>
-          </span>
-          <span className="text-gray-600">
-            {userData.promotionalEmailsLastUpdatedAt
-              ? userData.agreedToPromotionalEmails
-                ? `Termo aceitado em: ${new Date(
-                    userData.promotionalEmailsLastUpdatedAt
-                  ).toLocaleString()}`
-                : `Termo recusado em: ${new Date(
-                    userData.promotionalEmailsLastUpdatedAt
-                  ).toLocaleString()}`
-              : "Não disponível"}
-          </span>
-        </div>
-        {/* Botão de deletar conta */}
         <button
           onClick={async () => {
             const confirmDelete = confirm(
@@ -388,12 +426,6 @@ export default function UserSettings() {
       >
         Deslogar
       </button>
-
-      <ViewOnlyModal
-        isOpen={isViewOnlyModalOpen}
-        onClose={closeViewOnlyModal}
-        modalFocus={viewOnlyModalFocus!}
-      />
     </main>
   );
 }

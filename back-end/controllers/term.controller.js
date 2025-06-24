@@ -158,7 +158,7 @@ class TermController {
   }
 
   async fetchUserLatestTermLogs(req, res) {
-    const { userId } = req.body; // Changed from req.params to req.body to match POST request
+    const { userId } = req.query; // Changed to req.query to match GET request with URL parameters
 
     if (!userId) {
       return res.status(400).json({ message: "User ID is required." });
@@ -198,7 +198,13 @@ class TermController {
         };
       });
 
-      res.status(200).json(result);
+      res.status(200).json({
+        version: {
+          id: latestVersion.id,
+          name: latestVersion.version,
+        },
+        terms: result,
+      });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Error fetching user term logs." });
