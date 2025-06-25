@@ -1,8 +1,10 @@
 import "@/app/globals.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 export default function Term() {
+  const router = useRouter();
   const [latestTerms, setLatestTerms] = useState<any[]>([]);
   const [latestVersionName, setLatestVersionName] = useState<string>("");
   const [versionIncremented, setVersionIncremented] = useState<boolean>(false);
@@ -99,30 +101,55 @@ export default function Term() {
     }
   };
 
+  let token = "";
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("token") || "";
+  }
+
   const handleCreateVersion = async () => {
     try {
       // Create the new version
-      const versionResponse = await axios.post("http://localhost:3200/term/version", {
-        version: latestVersionName,
-      });
+      const versionResponse = await axios.post(
+        "http://localhost:3200/term/version",
+        {
+          version: latestVersionName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const versionId = versionResponse.data.id;
 
       // Create all terms for the new version
       for (const term of latestTerms) {
-        await axios.post("http://localhost:3200/term/term", {
-          name: term.name,
-          description: term.description,
-          versionId,
-          optional: term.optional,
-        });
+        await axios.post(
+          "http://localhost:3200/term/term",
+          {
+            name: term.name,
+            description: term.description,
+            versionId,
+            optional: term.optional,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       }
 
       alert("Nova versão e termos criados com sucesso!");
       setIsModified(false);
-    } catch (error) {
-      console.error("Error creating version and terms:", error);
-      alert("Falha ao criar nova versão e termos.");
+    } catch (err) {
+      const error = err as any;
+      if (error.response && error.response.status === 403) {
+        router.replace("/");
+      } else {
+        console.error("Error creating version and terms:", error);
+      }
     }
   };
 
